@@ -101,8 +101,11 @@ Two services, defined in [`render.yaml`](../../render.yaml) at the repo root:
   `AIR_JAM_ALLOWED_ORIGINS` set to the game's origin.
 * **game** (static site): `vite build` plus `tools/render-postbuild.mjs`, which
   copies the app shell to `dist/controller/index.html` so `/controller?room=...`
-  resolves on a host with no rewrite rules. `VITE_AIR_JAM_SERVER_URL` must point
-  at the server and is baked in at build time.
+  resolves on a host with no rewrite rules. `VITE_AIR_JAM_SERVER_URL` (the
+  server) and `VITE_AIR_JAM_PUBLIC_HOST` (the game's own origin) are baked in at
+  build time. BOTH are required: without the public host the SDK cannot read the
+  Vite env in a production build, falls back to dev topology and opens its socket
+  on the game origin instead of the server.
 
 Open the game URL on the projector; phones scan the QR code. A free Render web
 service sleeps when idle, so open it a minute before an event.

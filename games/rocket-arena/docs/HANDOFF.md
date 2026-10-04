@@ -243,7 +243,7 @@ node C:\Users\Wasif\Documents\airjam-RL\_scratch\serve-dist.mjs `
 5. **The `.wasm` has never been loaded through the real Air Jam platform asset route**
    (unchanged; `airjam dev` serves it with the right MIME type).
 6. Performance was measured on one laptop GPU only (6 views at 60 fps).
-7. Not deployed (see the deployment note in the game README, once added).
+7. Deployed to Render (free plan, Singapore): static site `airjam-rocket-arena` + Docker server `airjam-rocket-server`, from https://github.com/HyperionBurn/airjam-rocket-arena (orphan copy of this monorepo, unrelated media stripped, root `Dockerfile` = copy of `packages/server/Dockerfile`). See the Deploy section of the game README. Free instances sleep when idle; the first load after sleep takes about a minute.
 
 ## 11. Where things live
 

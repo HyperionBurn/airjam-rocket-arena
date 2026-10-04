@@ -28,5 +28,7 @@ services:
         value: "22"
       - key: VITE_AIR_JAM_SERVER_URL
         value: https://airjam-rocket-server.onrender.com
+      - key: VITE_AIR_JAM_PUBLIC_HOST
+        value: https://airjam-rocket-arena.onrender.com
       - key: VITE_AIR_JAM_APP_ID
         value: rocket-arena-demo

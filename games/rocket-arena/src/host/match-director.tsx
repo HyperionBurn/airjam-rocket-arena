@@ -18,6 +18,8 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useAirJamHost } from "@air-jam/sdk";
+import { getGamepadHub } from "@/host/gamepads";
+import { useRoomPlayers } from "@/host/use-players";
 
 import { selectCarBindingIntents, selectCpuTeams, type LobbyStore } from "@/lobby";
 import { MatchHud, type HudSeatInfo } from "@/host/match-hud";
@@ -99,7 +101,7 @@ const toMatchTuning = (tuning: { boost: string; ball: string; kickoffReset: stri
 
 export const MatchDirector = ({ runtime, controller, store, onActiveChange }: MatchDirectorProps) => {
   const host = useAirJamHost();
-  const players = useAirJamHost((state) => state.players);
+  const players = useRoomPlayers();
   const [hud, setHud] = useState<LocalMatchHud | null>(null);
   const [replay, setReplay] = useState(false);
   const [seatNames, setSeatNames] = useState<HudSeatInfo[]>([]);
@@ -336,8 +338,11 @@ export const MatchDirector = ({ runtime, controller, store, onActiveChange }: Ma
       teams: seatsRef.current.map((seat) => seat.team),
     }));
     const buzz = (commands: ReturnType<typeof planner.go>): void => {
+      const pads = getGamepadHub();
       for (const command of commands) {
-        hostRef.current.sendSignal("HAPTIC", { pattern: command.pattern }, command.playerId);
+        // A gamepad rumbles; a phone gets the HAPTIC signal.
+        if (pads.isPad(command.playerId)) pads.rumble(command.playerId, command.pattern);
+        else hostRef.current.sendSignal("HAPTIC", { pattern: command.pattern }, command.playerId);
       }
     };
     let previousPhase: string | null = null;

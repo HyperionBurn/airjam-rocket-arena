@@ -260,6 +260,48 @@ describe("Rocket League driving feel", () => {
   });
 });
 
+describe("gamepad trigger throttle", () => {
+  const drive = (extra: Record<string, unknown>, onGround = true) => {
+    const h = harness();
+    h.source.updateCarState({ onGround });
+    h.publish({ jump: false, ...extra });
+    return h.source.read();
+  };
+
+  it("uses the trigger value as the ground throttle, ignoring the stick's Y", () => {
+    expect(drive({ stick: { x: 0, y: 0.9 }, throttle: 0 }).throttle).toBe(0);
+    expect(drive({ stick: { x: 0, y: 0 }, throttle: 0.6 }).throttle).toBeCloseTo(0.6, 5);
+    expect(drive({ stick: { x: 0, y: 0 }, throttle: -1 }).throttle).toBe(-1);
+  });
+
+  it("does not apply the phone's throttle gain to a trigger", () => {
+    expect(drive({ stick: { x: 0, y: 0 }, throttle: 0.3 }).throttle).toBeCloseTo(0.3, 5);
+  });
+
+  it("steers from the stick as usual", () => {
+    expect(drive({ stick: { x: 0.5, y: 0 }, throttle: 1 }).steer).toBeGreaterThan(0.45);
+  });
+
+  it("boost still drives forward over a released trigger", () => {
+    expect(drive({ stick: { x: 0, y: 0 }, throttle: 0, boost: true }).throttle).toBe(1);
+  });
+
+  it("in the air the stick is pitch and the trigger is ignored", () => {
+    const controls = drive({ stick: { x: 0, y: 0.8 }, throttle: 1 }, false);
+    expect(controls.pitch).toBeLessThan(-0.6);
+    expect(controls.throttle).toBeGreaterThan(0.6); // stick.y, not the trigger
+  });
+
+  it("a phone (no throttle field) still derives throttle from the stick", () => {
+    expect(drive({ stick: { x: 0, y: 0.7 } }).throttle).toBe(1);
+  });
+
+  it("clamps an out-of-range trigger value in the parser", () => {
+    expect(drive({ stick: { x: 0, y: 0 }, throttle: 5 }).throttle).toBe(1);
+    expect(drive({ stick: { x: 0, y: 0 }, throttle: "fast" as unknown as number }).throttle).toBe(0);
+  });
+});
+
 describe("ground / air mapping", () => {
   it("maps the stick to throttle/steer on the ground and zeroes the air axes", () => {
     const h = harness();

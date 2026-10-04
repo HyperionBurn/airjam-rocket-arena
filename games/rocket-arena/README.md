@@ -90,6 +90,29 @@ donor's post-processing.
   car (measured against the Render deployment), which is the main reason the hosted
   version feels laggier.
 
+## Controls (Xbox / PlayStation gamepad)
+
+Plug a controller into the projector machine (USB) or pair it over Bluetooth, then
+**press any button on it** (browsers only reveal a gamepad after a press). It joins
+the lobby as "Xbox 1", "PS 1" and so on, takes a seat like a phone does, and can mix
+with phones in the same match (up to 6 players in total).
+
+| Action | Xbox | PlayStation |
+|---|---|---|
+| Steer / pitch + yaw in the air | Left stick | Left stick |
+| Accelerate / reverse | RT / LT | R2 / L2 |
+| Jump (again = double jump, with stick = flip) | A | Cross |
+| Boost | B or RB | Circle or R1 |
+| Powerslide / air roll | X or LB | Square or L1 |
+| Ball cam (your view only) | Y or R3 | Triangle or R3 |
+| Lobby: ready / not ready | A or Start / B | Cross or Options / Circle |
+| Lobby: team / car | LB, RB / D-pad left, right | L1, R1 / D-pad left, right |
+
+Controllers rumble on ball touches, goals, demolitions, "go" and the final whistle.
+A controller that is unplugged mid-match goes neutral and its car passes to a bot; if
+it comes back it gets the same car. Any controller the browser reports with the
+"standard" layout works. Code: `src/host/gamepads.ts`.
+
 ## Controls (phone)
 
 Left thumb: stick (drive / steer; pitch + yaw in the air). Right thumb: **BOOST**,

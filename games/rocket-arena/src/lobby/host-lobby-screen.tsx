@@ -194,6 +194,7 @@ export const HostLobbyScreen = ({
               roomCode={state.roomCode}
               joinCountLabel={joinCountLabel}
             />
+            <p className="lobby-hint">Have a controller? Press A on it to join. A = ready, LB/RB = team, D-pad = car.</p>
           </div>
 
           <div className="lobby-column">

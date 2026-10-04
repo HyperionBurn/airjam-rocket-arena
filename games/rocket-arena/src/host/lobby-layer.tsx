@@ -10,6 +10,7 @@
  */
 import { useEffect, useMemo } from "react";
 import { useAirJamHost } from "@air-jam/sdk";
+import { useRoomPlayers } from "@/host/use-players";
 
 import {
   HostLobbyScreen,
@@ -33,7 +34,7 @@ export interface LobbyLayerProps {
 
 export const LobbyLayer = ({ hidden }: LobbyLayerProps) => {
   const host = useAirJamHost();
-  const players = useAirJamHost((state) => state.players);
+  const players = useRoomPlayers();
   const store = useMemo(getLobbyStore, []);
 
   // Room identity: what the QR code encodes and what a player types.

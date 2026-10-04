@@ -222,7 +222,13 @@ const mapToControls = (
   const stick = shapeStick(input.stick, shaping);
   // The air-roll affordance, exactly as `touch.js:215` composes it.
   const airRollHeld = input.handbrake || input.airRoll;
-  let throttle = onGround ? unit(stick.y * GROUND_THROTTLE_GAIN) : stick.y;
+  // A gamepad sends its trigger throttle; a phone's single stick is throttle too.
+  let throttle =
+    onGround && input.throttle !== null
+      ? input.throttle
+      : onGround
+        ? unit(stick.y * GROUND_THROTTLE_GAIN)
+        : stick.y;
   if (onGround && input.boost && stick.y > BOOST_DRIVES_ABOVE) throttle = 1;
   return sanitizeControls({
     throttle,

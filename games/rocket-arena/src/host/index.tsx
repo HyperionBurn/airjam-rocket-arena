@@ -56,6 +56,9 @@ const SEAM_FAILURE =
   "not reachable, so phone controllers cannot drive. The game is unplayable in " +
   "Air Jam until this is fixed.";
 
+import { getGamepadHub } from "@/host/gamepads";
+import { useRoomPlayers } from "@/host/use-players";
+
 export const HostSurface = () => {
   const [status, setStatus] = useState<BootStatus | null>(null);
   const [phase, setPhase] = useState<Phase>("booting");
@@ -65,7 +68,9 @@ export const HostSurface = () => {
   const [matchActive, setMatchActive] = useState(false);
 
   const getInput = useGetInput<typeof gameInputSchema>();
-  const players = useAirJamHost((state) => state.players);
+  // Phones and gamepads, as one roster.
+  const players = useRoomPlayers();
+  const gamepads = useMemo(getGamepadHub, []);
   const runtimeState = useAirJamHost((state) => state.runtimeState);
   const controllers = useAirJamHost((state) => state.controllers);
 
@@ -75,8 +80,8 @@ export const HostSurface = () => {
   controllerRef.current = controller;
 
   const readRaw = useCallback(
-    (playerId: string) => getInput(playerId) ?? null,
-    [getInput],
+    (playerId: string) => (gamepads.isPad(playerId) ? gamepads.read(playerId) : (getInput(playerId) ?? null)),
+    [getInput, gamepads],
   );
 
   /**
@@ -105,6 +110,8 @@ export const HostSurface = () => {
       onBallCamToggle: (slot) => controllerRef.current?.toggleBallCam(slot),
     });
     runtimeRef.current = runtime;
+    // Lobby buttons on a pad only act between matches.
+    gamepads.setPhaseSource(() => getLobbyStore().getState().phase);
     if (SHOW_DEBUG) {
       // Dev aid for automated checks (`?debug`): never present on a clean projector URL.
       Object.assign(window, {
@@ -161,8 +168,10 @@ export const HostSurface = () => {
   // Presence: a phone that drops out is neutral at once, and takes the wheel
   // back by itself when it reconnects (see `setPresence`).
   useEffect(() => {
-    runtimeRef.current?.syncPresence(controllers);
-  }, [controllers, players]);
+    // A connected gamepad is present by definition; the SDK only knows phones.
+    const pads = players.filter((player) => gamepads.isPad(player.id)).map((player) => ({ controllerId: player.id, connected: true }));
+    runtimeRef.current?.syncPresence([...controllers, ...pads]);
+  }, [controllers, players, gamepads]);
 
   // The runtime snapshot is LIVE data (car count, boost, on-ground), but the
   // sim handle is only captured once the donor first calls `setControls` — which

@@ -62,6 +62,12 @@ export const ROCKET_ARENA_INPUT_FIELDS = {
   airRoll: "airRoll",
   /** Monotonic count of ball-cam button presses. A COUNT, so a tap can never be lost. */
   ballCamPresses: "ballCamPresses",
+  /**
+   * Analog throttle (-1 reverse .. +1 forward) from a gamepad's triggers. A phone
+   * does not send it (its single stick is both throttle and steering), so null
+   * means "derive throttle from the stick".
+   */
+  throttle: "throttle",
   /** Phone-private lobby choices: ready flag, team preference, display name. */
   lobby: "lobby",
 } as const;
@@ -114,6 +120,7 @@ export const EMPTY_ROCKET_ARENA_INPUT: RocketArenaInput = Object.freeze({
   handbrake: false,
   airRoll: false,
   ballCamPresses: null,
+  throttle: null,
   lobby: null,
 });
 
@@ -127,6 +134,8 @@ export interface RocketArenaInput {
   airRoll: boolean;
   /** Null when the phone has not sent the field (an older controller build). */
   ballCamPresses: number | null;
+  /** Gamepad trigger throttle, or null (phones): see `ROCKET_ARENA_INPUT_FIELDS.throttle`. */
+  throttle: number | null;
   /** Null when the phone has not sent the field. */
   lobby: LobbyIntent | null;
 }
@@ -200,6 +209,11 @@ export const parseRocketArenaInput = (raw: unknown): RocketArenaInput => {
       typeof payload[ROCKET_ARENA_INPUT_FIELDS.ballCamPresses] === "number" &&
       Number.isFinite(payload[ROCKET_ARENA_INPUT_FIELDS.ballCamPresses])
         ? (payload[ROCKET_ARENA_INPUT_FIELDS.ballCamPresses] as number)
+        : null,
+    throttle:
+      typeof payload[ROCKET_ARENA_INPUT_FIELDS.throttle] === "number" &&
+      Number.isFinite(payload[ROCKET_ARENA_INPUT_FIELDS.throttle])
+        ? Math.max(-1, Math.min(1, payload[ROCKET_ARENA_INPUT_FIELDS.throttle] as number))
         : null,
     lobby: readLobby(payload[ROCKET_ARENA_INPUT_FIELDS.lobby]),
   };

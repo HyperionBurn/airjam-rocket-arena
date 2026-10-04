@@ -61,6 +61,15 @@ screen, bot fill on.
   buzz on ball touches (light/medium), goals (heavy for the scorer, success/failure for
   the rest), demolitions, "go" and the final whistle.
 
+## Look
+
+A dusk arena under sweeping floodlights: HDR bloom, filmic grade, neon pitch
+markings, speed streaking at the screen edges, a ground glow under boosting cars,
+a fireball-and-smoke goal burst, a round boost dial and floating nameplates. The
+method and the before/after are in [`docs/VISUAL-ANALYSIS.md`](docs/VISUAL-ANALYSIS.md).
+Add `?daylight` to the host URL for the original bright park, `?plainpost` for the
+donor's post-processing.
+
 ## How it drives
 
 * **Floating stick:** the left thumb's neutral point is wherever it lands, so a

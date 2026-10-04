@@ -19,6 +19,9 @@ leave the donor's own single-player behaviour unchanged when not embedded.**
 | `src/donor/app/local-multiplayer.js` | The local N-car match controller: roster setup, the per-frame driver, per-player cameras, split-screen rendering, goal/replay bookkeeping, audio for N cars, HUD data. |
 | `src/donor/app/tile-viewports.js` | Pure split-screen tiling (1-6 views, gap-free). Separate so it is unit-tested without Three.js. |
 | `src/donor/audio/arena-sfx.js` | Match-event sounds the donor never had: kickoff tick and "go", goal blast + horn + crowd, demolition, boost pad pickup, full-time buzzer. Synthesised with Web Audio (no assets), through one limiter into the donor's own mixer. |
+| `src/donor/rendering/arena-post.js` | The match's own post chain: HDR 3-scale bloom, filmic tone map, split-toned grade, vignette, speed-driven radial blur and chromatic aberration, colour flash. Replaces the donor chains for match views (`?plainpost` restores them). |
+| `src/donor/rendering/arena-look.js` | Dusk atmosphere: procedural sky, light colours, fog, scenery tints, floodlight beams. `?daylight` skips it. |
+| `src/donor/effects/arena-fx.js` | `GoalBurst` (fireball, team smoke, ring, sparks) and `BoostGlow` (ground light under boosting cars). |
 | `src/donor/app/fov.js` | Pure FOV compensation for narrow split-screen tiles (partial, capped at 112 degrees). |
 
 ## Edited files
@@ -37,6 +40,9 @@ leave the donor's own single-player behaviour unchanged when not embedded.**
 | `src/donor/rendering/world.js` | (1) `GameWorld.update` and `updateBoostVisuals` read an optional `controlsByCar` so every car's jets, flip flames and wheel spin follow its own input. (2) `cloneWithOwnPaint`: each car gets its own paint materials (textures shared, not cloned). | (1) The donor passed one control set for "car 0" and one for "everyone else". (2) Cars cloned from one model shared materials, and team paint is written into material uniforms, so two cars of the same model on different teams ended up the same colour. |
 | `src/donor/effects/car-motion.js` | `updateRibbon` split into advance + `rebuildRibbon`; new `orient(cars, camera)`. | Ribbons, ember quads and the heat bubble bake the camera into shared geometry; a split-screen match re-orients them per viewport right before each draw. |
 | `src/donor/materials/park-lighting.js` | `CONTACT_SHADOW_SLOTS` 3 -> 7 (shader loop instead of three hand-written lines). | Ground contact/cast shadows for all 6 cars, not ball + 2. |
+| `src/donor/arena/park.js` | `paintParkPitch`: cool/darken the lawn and draw the markings as neon (additive) lines. | The dusk grade needs a dark pitch for the lines to glow. |
+| `src/donor/app/startup.js` (post) | `makeViewPost` routes match views through `ArenaPost` (unless `?plainpost`); `exposeDebug`. | The donor chains only add a light bloom. |
+| `src/donor/app/local-multiplayer.js` (visuals) | Passes per-view speed/boost/flash to the post chain, applies the dusk look, drives `GoalBurst`/`BoostGlow`, projects nameplate positions into `hud()`. | The effects belong to events this controller already detects. |
 | `src/donor/audio/settings.js` | Embedded: mute only when the document is hidden, not when the window loses focus. | The projector window is routinely unfocused during an event; the donor's focus rule silenced the arena. |
 
 ## What the controller reuses (unchanged)

@@ -71,40 +71,129 @@
   color: #cfe6ff;
 }
 
-.ra-hud__boost {
+/* Boost gauge: a 270-degree dial with a big readout, bottom-right of each view. */
+.ra-gauge {
   position: absolute;
-  right: 16px;
-  bottom: 16px;
+  right: clamp(10px, 1.6vw, 28px);
+  bottom: clamp(10px, 2vh, 26px);
+  width: clamp(84px, 11vmin, 168px);
+  aspect-ratio: 1;
   display: grid;
-  justify-items: end;
-  gap: 4px;
+  place-items: center;
+  filter: drop-shadow(0 4px 14px #000a);
 }
 
-.ra-hud__boost-value {
-  font-size: 34px;
-  font-weight: 800;
-  line-height: 1;
-  text-shadow: 0 2px 8px #000a;
-}
-
-.ra-hud__boost-bar {
-  width: clamp(90px, 14vw, 180px);
-  height: 10px;
-  border-radius: 6px;
-  background: #02101fb3;
-  overflow: hidden;
-}
-
-.ra-hud__boost-fill {
+.ra-gauge__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
   height: 100%;
-  border-radius: 6px;
-  background: linear-gradient(90deg, #ff8a1f, #ffd23f);
-  transition: width 90ms linear;
+  overflow: visible;
 }
 
-.ra-hud__boost[data-boosting="true"] .ra-hud__boost-fill {
-  background: linear-gradient(90deg, #ffd23f, #fffbe0);
-  box-shadow: 0 0 12px #ffd23f;
+.ra-gauge__bed {
+  fill: #050c1fd9;
+  stroke: #6fb8ff55;
+  stroke-width: 1.2;
+}
+
+.ra-gauge__track,
+.ra-gauge__fill,
+.ra-gauge__ticks {
+  fill: none;
+  stroke-linecap: butt;
+}
+
+.ra-gauge__track {
+  stroke: #ffffff1a;
+  stroke-width: 8;
+}
+
+.ra-gauge__fill {
+  stroke: #ff9c2e;
+  stroke-width: 8;
+  transition: stroke-dasharray 90ms linear, stroke 120ms linear;
+  filter: drop-shadow(0 0 5px #ff9c2e);
+}
+
+.ra-gauge__ticks {
+  stroke: #9fd0ff88;
+  stroke-width: 2.2;
+}
+
+.ra-gauge[data-boosting="true"] .ra-gauge__fill {
+  stroke: #fff2b8;
+  filter: drop-shadow(0 0 9px #ffd23f);
+}
+
+.ra-gauge[data-low="true"] .ra-gauge__fill {
+  stroke: #ff5a3c;
+  filter: drop-shadow(0 0 6px #ff5a3c);
+}
+
+.ra-gauge__value {
+  position: relative;
+  font-size: clamp(30px, 4.6vmin, 64px);
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 14px #5aa9ff99, 0 2px 6px #000;
+  transform: translateY(-4%);
+}
+
+.ra-gauge__label {
+  position: absolute;
+  bottom: 17%;
+  font-size: clamp(8px, 1.25vmin, 13px);
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  color: #9fc4ee;
+  opacity: 0.85;
+}
+
+/* Floating nameplates over the other cars, tinted by team. */
+.ra-plate {
+  position: fixed;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 220px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 4px;
+  background: #050c1fcc;
+  border-bottom: 2px solid var(--plate, #fff);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px #000;
+  transform-origin: 50% 100%;
+}
+
+.ra-plate[data-team="0"] {
+  --plate: #55baff;
+}
+
+.ra-plate[data-team="1"] {
+  --plate: #ffab47;
+}
+
+.ra-plate__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--plate);
+  box-shadow: 0 0 8px var(--plate);
+}
+
+.ra-plate[data-friend="true"] {
+  box-shadow: 0 0 12px color-mix(in srgb, var(--plate) 55%, transparent);
 }
 
 .ra-hud__speed {

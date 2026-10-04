@@ -479,8 +479,18 @@ export function paintParkPitch(canvas, context, artwork) {
   if(artwork)context.drawImage(artwork,0,0,width,height);
   else {context.fillStyle='#426532';context.fillRect(0,0,width,height);}
   context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';
+  // AIR JAM PATCH: dusk arena grade. Cool the lawn and darken it so the markings
+  // can glow, then draw the lines as neon (additive) instead of chalk.
+  context.save();
+  context.globalCompositeOperation='multiply';context.fillStyle='rgb(178,198,242)';context.fillRect(0,0,width,height);
+  const vignette=context.createRadialGradient(width/2,height/2,Math.min(width,height)*.18,width/2,height/2,Math.max(width,height)*.62);
+  vignette.addColorStop(0,'rgba(255,255,255,0)');vignette.addColorStop(1,'rgba(20,24,56,.38)');
+  context.fillStyle=vignette;context.fillRect(0,0,width,height);
+  context.restore();
   context.save();context.scale(width/8192,height/10240);context.translate(4096,5120);
-  context.strokeStyle='rgba(231,238,216,.83)';context.lineWidth=20;
+  context.globalCompositeOperation='lighter';
+  context.shadowColor='rgba(120,215,255,.95)';context.shadowBlur=Math.max(6,width/110);
+  context.strokeStyle='rgba(110,205,255,.62)';context.lineWidth=26;
   context.lineJoin='round';context.lineCap='round';
   // The overhead references have a clean painted goal area, not nested soccer
   // penalty boxes. Team paint and mowing continue beneath the single outline.
@@ -495,7 +505,7 @@ export function paintParkPitch(canvas, context, artwork) {
     context.quadraticCurveTo(3720,side*4770,3720,side*3500);
     context.lineTo(3720,0);context.stroke();
   }
-  context.strokeStyle='rgba(238,244,218,.86)';context.lineWidth=18;
+  context.strokeStyle='rgba(150,225,255,.7)';context.lineWidth=24;
   context.beginPath();context.moveTo(-3720,0);context.lineTo(3720,0);context.stroke();
   for(const radius of [915,540]){context.beginPath();context.arc(0,0,radius,0,Math.PI*2);context.stroke();}
   context.fillStyle='rgba(242,247,228,.9)';context.beginPath();context.arc(0,0,19,0,Math.PI*2);context.fill();

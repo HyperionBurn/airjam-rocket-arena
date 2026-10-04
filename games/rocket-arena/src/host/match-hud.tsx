@@ -8,7 +8,7 @@
  */
 import type { CSSProperties } from "react";
 
-import type { LocalMatchHud, LocalMatchHudView } from "@/host/local-match";
+import type { LocalMatchHud, LocalMatchHudMark, LocalMatchHudView } from "@/host/local-match";
 import "./match-hud.css";
 
 export interface HudSeatInfo {
@@ -58,6 +58,59 @@ const Dividers = ({ views }: { views: LocalMatchHudView[] }) => {
   );
 };
 
+/** Ring geometry for the boost gauge (SVG viewBox 0 0 100 100). */
+const RING_RADIUS = 42;
+const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
+/** The gauge sweeps 270 degrees, open at the bottom, like a car's dial. */
+const RING_SWEEP = 0.75;
+
+const BoostGauge = ({ boost, boosting }: { boost: number; boosting: boolean }) => {
+  const arc = RING_LENGTH * RING_SWEEP;
+  return (
+    <div className="ra-gauge" data-boosting={boosting} data-low={boost < 20}>
+      <svg viewBox="0 0 100 100" className="ra-gauge__svg" aria-hidden="true">
+        <circle className="ra-gauge__bed" cx="50" cy="50" r="47" />
+        <circle
+          className="ra-gauge__track"
+          cx="50" cy="50" r={RING_RADIUS}
+          strokeDasharray={`${arc} ${RING_LENGTH}`}
+          transform="rotate(135 50 50)"
+        />
+        <circle
+          className="ra-gauge__fill"
+          cx="50" cy="50" r={RING_RADIUS}
+          strokeDasharray={`${(arc * boost) / 100} ${RING_LENGTH}`}
+          transform="rotate(135 50 50)"
+        />
+        <circle
+          className="ra-gauge__ticks"
+          cx="50" cy="50" r={RING_RADIUS + 5}
+          strokeDasharray={`1.2 ${arc / 20 - 1.2}`}
+          transform="rotate(135 50 50)"
+        />
+      </svg>
+      <div className="ra-gauge__value">{boost}</div>
+      <div className="ra-gauge__label">BOOST</div>
+    </div>
+  );
+};
+
+/** A floating nameplate over another car, scaled down with distance. */
+const Nameplate = ({ mark, name, ownTeam }: { mark: LocalMatchHudMark; name: string; ownTeam: number }) => {
+  const scale = Math.max(0.55, Math.min(1.15, 1.35 - mark.distance / 5200));
+  return (
+    <div
+      className="ra-plate"
+      data-team={mark.team}
+      data-friend={mark.team === ownTeam}
+      style={{ left: mark.x, top: mark.y, transform: `translate(-50%, -100%) scale(${scale})` }}
+    >
+      <span className="ra-plate__dot" />
+      {name}
+    </div>
+  );
+};
+
 const Tile = ({ view, name }: { view: LocalMatchHudView; name: string }) => {
   const rect = view.rect;
   if (!rect) return null;
@@ -78,12 +131,7 @@ const Tile = ({ view, name }: { view: LocalMatchHudView; name: string }) => {
         {Math.round(view.speed * UU_TO_KPH)}
         <small>KPH</small>
       </div>
-      <div className="ra-hud__boost" data-boosting={view.boosting}>
-        <div className="ra-hud__boost-value">{boost}</div>
-        <div className="ra-hud__boost-bar">
-          <div className="ra-hud__boost-fill" style={{ width: `${boost}%` }} />
-        </div>
-      </div>
+      <BoostGauge boost={boost} boosting={view.boosting} />
     </div>
   );
 };
@@ -96,6 +144,18 @@ export const MatchHud = ({ hud, seats, replay = false }: MatchHudProps) => {
       {hud.views.map((view) => (
         <Tile key={view.index} view={view} name={seats[view.car]?.name ?? `Player ${view.car + 1}`} />
       ))}
+      {!replay
+        ? hud.views.flatMap((view) =>
+            (view.marks ?? []).map((mark) => (
+              <Nameplate
+                key={`${view.index}-${mark.car}`}
+                mark={mark}
+                ownTeam={view.team}
+                name={seats[mark.car]?.name ?? `Player ${mark.car + 1}`}
+              />
+            )),
+          )
+        : null}
 
       <div className="ra-hud__score">
         <div className="ra-hud__team" data-team="0">

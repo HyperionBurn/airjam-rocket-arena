@@ -1,6 +1,8 @@
 import { mountOnline } from '../online/interface.js';
 import { setCarMaterialQuality } from "../materials/car.js";
 import {FennecV2Post} from '../rendering/fennec-v2-post.js';
+import {ArenaPost} from '../rendering/arena-post.js';
+const PLAIN_POST = new URLSearchParams(window.location.search).has('plainpost');
 import { ReferencePost } from '../rendering/reference-post.js';
 import { ReferenceLighting } from '../rendering/reference-lighting.js';
 import { getTheme } from '../rendering/theme.js';
@@ -1174,9 +1176,16 @@ async function startGame() {
   // (`sizeOverride`), because both post classes size their targets from the
   // whole drawing buffer. The branches mirror `renderGame` above.
   const makeViewPost = () => {
-    let reference = null, fennec = null;
+    let reference = null, fennec = null, arena = null;
     return {
-      render(scene, camera, sizePx) {
+      render(scene, camera, sizePx, fx) {
+        // The match's own grade (bloom, tone map, dusk look, speed feel). `?plainpost`
+        // falls back to the donor chains for A/B comparison.
+        if (!PLAIN_POST) {
+          arena ??= new ArenaPost(te);
+          arena.render(scene, camera, sizePx, fx);
+          return;
+        }
         const theme = getTheme();
         N.updateSceneryDetail(camera);
         if (theme === 'realistic') {
@@ -1190,7 +1199,7 @@ async function startGame() {
           fennec.render(scene, camera, !quality.effects);
         } else te.render(scene, camera);
       },
-      dispose() { reference?.dispose(); fennec?.dispose(); },
+      dispose() { reference?.dispose(); fennec?.dispose(); arena?.dispose(); },
     };
   };
   localMulti = createLocalMultiplayer({
@@ -1203,6 +1212,8 @@ async function startGame() {
     engines: E, vehicleAudio: g, impactAudio: m, ballAudio: C, impactSerials: y,
     neutralControls: A, pads: Le, wheelStride: EC, setAudioListener: _1,
     makePost: makeViewPost,
+    // Dev/debug only: lets a harness inspect the scene graph and tune the look live.
+    exposeDebug: () => { window.__arena = { world: N, renderer: te }; },
     resetKickoff: _e,
     syncNativeGeometry,
     garageVisual: () => i,

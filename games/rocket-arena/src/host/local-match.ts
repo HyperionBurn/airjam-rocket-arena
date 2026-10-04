@@ -48,6 +48,17 @@ export interface LocalMatchHudView {
   demolished: boolean;
   /** Unreal units per second. */
   speed: number;
+  /** The other cars on this view's screen, for floating nameplates (page px). */
+  marks: LocalMatchHudMark[];
+}
+
+export interface LocalMatchHudMark {
+  car: number;
+  team: MatchTeam;
+  x: number;
+  y: number;
+  /** World distance from this view's camera, in uu. */
+  distance: number;
 }
 
 export type MatchPhase = "kickoff" | "playing" | "goal" | "ended";

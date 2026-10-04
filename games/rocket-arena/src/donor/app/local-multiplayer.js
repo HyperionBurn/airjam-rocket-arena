@@ -41,6 +41,8 @@ import { BallLocator } from "../effects/ball-locator.js";
 import { EngineAudio } from "../audio/engine.js";
 import { VehicleAudio } from "../audio/vehicle.js";
 import { ArenaSfx } from "../audio/arena-sfx.js";
+import { applyDuskLook } from "../rendering/arena-look.js";
+import { GoalBurst, BoostGlow } from "../effects/arena-fx.js";
 import { CAR_STATE, CAR_STATE_STRIDE, STATE_LAYOUT, ro } from "../physics/state-layout.js";
 import { resolveVisualHitboxFamily } from "../physics/presets.js";
 import { tileViewports } from "./tile-viewports.js";
@@ -93,6 +95,9 @@ const neutralControlSet = () => ({
   handbrake: false,
 });
 
+/** A URL flag, safe outside a browser (unit tests run in node). */
+const urlFlag = (name) => typeof window !== "undefined" && Boolean(window.location) && new URLSearchParams(window.location.search).has(name);
+
 export function createLocalMultiplayer(ctx) {
   const sfx = new ArenaSfx();
   const st = {
@@ -126,6 +131,8 @@ export function createLocalMultiplayer(ctx) {
     kickoffTicks: 0,
     kickoffCount: 0,
     prevCountdown: 0,
+    flash: 0,
+    flashColor: [0, 0, 0],
     tuning: { ...DEFAULT_TUNING },
     prevPhase: null,
     listeners: new Set(),
@@ -368,7 +375,24 @@ export function createLocalMultiplayer(ctx) {
     while (st.posts.length > st.views.length) st.posts.pop().dispose();
   };
 
-  const drawView = (post, camera, rect, canvasHeight, pixelRatio) => {
+  /**
+   * What the post chain needs to make a view feel fast: how close to supersonic
+   * the car is, whether it is boosting, and a short colour flash (goals).
+   */
+  const viewFx = (car) => {
+    const state = ctx.clock.currState;
+    const base = STATE_LAYOUT.CARS + car * CAR_STATE_STRIDE;
+    const vel = CAR_STATE.VEL;
+    const speed = Math.hypot(state[base + vel], state[base + vel + 1], state[base + vel + 2]);
+    return {
+      // 0 until ~1000 uu/s (a brisk drive), 1 at the supersonic threshold.
+      speed: Math.min(1, Math.max(0, (speed - 1000) / 1300)),
+      boost: state[base + CAR_STATE.IS_BOOSTING] === 1 ? 1 : 0,
+      flash: st.flash > 0 ? st.flashColor.map((channel) => channel * st.flash) : null,
+    };
+  };
+
+  const drawView = (post, camera, rect, canvasHeight, pixelRatio, fx) => {
     const { renderer } = ctx;
     const aspect = rect.width / rect.height;
     if (camera.aspect !== aspect) camera.aspect = aspect;
@@ -380,7 +404,7 @@ export function createLocalMultiplayer(ctx) {
     post.render(ctx.world.scene, camera, {
       x: Math.max(1, Math.round(rect.width * pixelRatio)),
       y: Math.max(1, Math.round(rect.height * pixelRatio)),
-    });
+    }, fx);
   };
 
   const drawSpeedLines = (index) => {
@@ -424,7 +448,7 @@ export function createLocalMultiplayer(ctx) {
       quality.effects && world.prepareBallSpeedTrail(cam);
       ctx.motionEffects.orient(world.cars, cam);
       showLocatorFor(view.car);
-      drawView(st.posts[view.index], cam, rect, height, pixelRatio);
+      drawView(st.posts[view.index], cam, rect, height, pixelRatio, viewFx(view.car));
       drawSpeedLines(view.car);
     }
     showLocatorFor(-1);
@@ -568,11 +592,57 @@ export function createLocalMultiplayer(ctx) {
     }
   };
 
+  /**
+   * Where the OTHER cars appear on this view's screen (CSS px, page space), for
+   * floating nameplates. Cars behind the camera or demolished get no mark.
+   */
+  const nameplateMarks = (view, point, state) => {
+    const cam = st.cams[view.car]?.camera;
+    const rect = view.rect;
+    if (!cam || !rect || !ctx.world?.cars) return [];
+    const marks = [];
+    for (let i = 0; i < st.count; i++) {
+      if (i === view.car) continue;
+      const car = ctx.world.cars[i];
+      if (!car || state[STATE_LAYOUT.CARS + i * CAR_STATE_STRIDE + CAR_STATE.DEMOED] === 1) continue;
+      point.copy(car.position);
+      point.y += 150;
+      const distance = point.distanceTo(cam.position);
+      point.project(cam);
+      if (point.z > 1 || Math.abs(point.x) > 1.05 || Math.abs(point.y) > 1.05) continue;
+      marks.push({
+        car: i,
+        team: st.teams[i],
+        x: rect.x + (point.x * 0.5 + 0.5) * rect.width,
+        y: rect.y + (1 - (point.y * 0.5 + 0.5)) * rect.height,
+        distance,
+      });
+    }
+    return marks;
+  };
+
+  /** Pooled event effects: the goal burst and the boost light pools. */
+  const updateMatchFx = (dt) => {
+    const fx = st.fx;
+    if (!fx) return;
+    const state = ctx.clock.currState;
+    const boosting = [];
+    const demolished = [];
+    for (let i = 0; i < st.count; i++) {
+      const base = STATE_LAYOUT.CARS + i * CAR_STATE_STRIDE;
+      boosting.push(state[base + CAR_STATE.IS_BOOSTING] === 1);
+      demolished.push(state[base + CAR_STATE.DEMOED] === 1);
+    }
+    fx.glow.update(dt, ctx.world.cars, boosting, demolished);
+    fx.burst.update(dt);
+  };
+
   const frame = (now) => {
     const { sim, world, session, clock, profiler, quality } = ctx;
     const gp = ctx.goalPresentation;
     const dt = Math.min(Math.max((now - st.lastTime) / 1000, 0), 0.1);
     st.lastTime = now;
+    if (st.flash > 0) st.flash = Math.max(0, st.flash - dt * 1.6);
 
     if (gp?.active) {
       clock.sync(now);
@@ -588,6 +658,7 @@ export function createLocalMultiplayer(ctx) {
         return;
       }
       ctx.arenaEffects.update(dt);
+      st.fx?.burst.update(dt);
       renderGoalShot();
       profiler.frameEnd(0, 0, false);
       return;
@@ -610,6 +681,7 @@ export function createLocalMultiplayer(ctx) {
     updateCameras(dt);
     updateLocators();
     publishFrameEvents();
+    updateMatchFx(dt);
     profiler.mark();
 
     if (!document.hidden && (playing || st.pendingGoal)) {
@@ -629,6 +701,10 @@ export function createLocalMultiplayer(ctx) {
       world.controlsByCar = null;
       emit({ type: "goal", team: goal.team, scorer: goal.scorerIndex });
       sfx.goal();
+      st.fx?.burst.trigger(world.ball.position, goal.team);
+      // A white-hot flash tinted toward the scoring team's colour.
+      st.flash = 1;
+      st.flashColor = goal.team === 0 ? [0.04, 0.09, 0.2] : [0.2, 0.1, 0.03];
       ctx.goalPresentation.begin({
         time: st.replayClock,
         state: clock.currState,
@@ -768,6 +844,13 @@ export function createLocalMultiplayer(ctx) {
       // "You scored!" only makes sense with one player; everyone else gets the neutral graphic.
       if (ctx.goalPresentation) ctx.goalPresentation.playerIndex = -1;
 
+      if (urlFlag("debug")) ctx.exposeDebug?.();
+      // The arena's dusk atmosphere (sky, light colours, floodlight beams). `?daylight` keeps the donor's look.
+      if (!urlFlag("daylight")) applyDuskLook(ctx.world);
+      st.fx ??= { burst: new GoalBurst(ctx.world.scene), glow: new BoostGlow(ctx.world.scene, cars.length) };
+      st.fx.burst.clear();
+      st.fx.glow.clear();
+      if (window.__arena) window.__arena.fx = st.fx;
       st.paused = false;
       // Event mode: turbo boost is unlimited boost. (configureOnline resets it.)
       sim.setUnlimitedBoost(st.tuning.boost === "turbo");
@@ -793,6 +876,8 @@ export function createLocalMultiplayer(ctx) {
     st.active = false;
     ctx.goalPresentation?.finish({ cancel: true });
     if (ctx.goalPresentation && st.savedPlayerIndex !== null) ctx.goalPresentation.playerIndex = st.savedPlayerIndex;
+    st.fx?.burst.clear();
+    st.fx?.glow.clear();
     disposeViews();
     ctx.world.controlsByCar = null;
     ctx.engines.length = st.baseEngines || 2;
@@ -862,6 +947,7 @@ export function createLocalMultiplayer(ctx) {
     },
     /** Live data for the host's HUD overlay and phone readouts. Cheap; call it a few times a second. */
     hud() {
+      const markPoint = new F();
       const { session, clock } = ctx;
       const state = clock.currState;
       return {
@@ -904,6 +990,7 @@ export function createLocalMultiplayer(ctx) {
             airborne: state[base + CAR_STATE.ON_GROUND] !== 1,
             demolished: state[base + CAR_STATE.DEMOED] === 1,
             speed: Math.hypot(vx, vy, vz),
+            marks: nameplateMarks(view, markPoint, state),
           };
         }),
       };

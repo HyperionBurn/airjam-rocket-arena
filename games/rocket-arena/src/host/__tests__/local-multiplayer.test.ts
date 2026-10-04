@@ -75,6 +75,18 @@ vi.mock("../../donor/effects/ball-locator.js", () => ({
 }));
 vi.mock("../../donor/audio/engine.js", () => ({ EngineAudio: class { update() {} } }));
 vi.mock("../../donor/audio/vehicle.js", () => ({ VehicleAudio: class { update() {} } }));
+vi.mock("../../donor/rendering/arena-look.js", () => ({ applyDuskLook() {} }));
+vi.mock("../../donor/effects/arena-fx.js", () => ({
+  GoalBurst: class {
+    trigger() {}
+    update() {}
+    clear() {}
+  },
+  BoostGlow: class {
+    update() {}
+    clear() {}
+  },
+}));
 vi.mock("../../donor/audio/arena-sfx.js", () => ({
   ArenaSfx: class {
     tick() {}

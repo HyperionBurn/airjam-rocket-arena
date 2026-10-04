@@ -48,6 +48,12 @@ screen, bot fill on.
 * **Cars:** fennec, octane-original, challenger, spectre, vesper, amethyst - the
   bodies the donor can draw. Two players on different teams may pick the same car;
   each gets their own team colour.
+* **CPU players:** on the projector roster, **+ CPU Blue / + CPU Orange** adds a
+  computer-controlled seat to a team (the arrows switch its team, the cross removes
+  it). CPUs use the lobby's bot difficulty, count toward the seat limit and a team's
+  four-car cap, and are the first to go if humans need the seat. **Bot fill** then
+  tops both teams up to the team size on top of them. At least one human is needed
+  to start.
 * **Late joiners and drop-outs:** a phone that joins mid-match takes over a bot's
   car (on its team if possible); a phone that drops hands its car to a bot, and gets
   the same car back when it returns. With no free car it spectates.

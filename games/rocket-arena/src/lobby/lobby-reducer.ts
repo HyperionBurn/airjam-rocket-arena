@@ -32,6 +32,7 @@ import { balanceAutoTeams, countTeams, pickAutoTeam, teamForChoice } from "./tea
 import type {
   EventTuning,
   LobbyAction,
+  LobbyCpu,
   LobbyPlayer,
   LobbyPlayerSeed,
   LobbySettings,
@@ -57,6 +58,7 @@ export const createInitialLobbyState = (
   joinUrl: NO_JOIN_URL,
   phase: "lobby",
   players: [],
+  cpus: [],
   departed: {},
   settings: DEFAULT_SETTINGS,
   match: { blue: 0, orange: 0, clockMs: matchDurationMs(DEFAULT_SETTINGS.matchLength), number: 0 },
@@ -238,7 +240,85 @@ const materializePlayer = (
 /* The reducer                                                                 */
 /* -------------------------------------------------------------------------- */
 
+/** A team never holds more than half the arena (`MAX_PLAYER_SLOTS` is the whole arena). */
+export const MAX_TEAM_CARS = MAX_PLAYER_SLOTS / 2;
+
+/**
+ * Keep humans + CPUs inside the seats on offer. Humans always win a seat: when
+ * someone joins a full room, or the host lowers the seat count, the NEWEST CPUs
+ * are the ones dropped. Returns the same state when nothing has to go.
+ */
+const fitCpusToSeats = (state: LobbyState): LobbyState => {
+  const room = Math.max(0, state.settings.playerSlots - state.players.length);
+  if (state.cpus.length <= room) return state;
+  const cpus = state.cpus.slice(0, room);
+  return {
+    ...state,
+    cpus,
+    revision: state.revision + 1,
+    announcement: `${state.cpus.length - cpus.length} CPU removed to make room for players`,
+  };
+};
+
+const reduceCpus = (state: LobbyState, action: LobbyAction): LobbyState | null => {
+  switch (action.type) {
+    case "cpu/add": {
+      // Seats are only edited between matches: a CPU is a roster fact, and the
+      // match director reads it once, at launch.
+      if (state.phase !== "lobby") return state;
+      const team: LobbyTeam = action.team === 1 ? 1 : 0;
+      if (state.players.length + state.cpus.length >= state.settings.playerSlots) return state;
+      const onTeam =
+        state.players.filter((player) => player.team === team).length +
+        state.cpus.filter((cpu) => cpu.team === team).length;
+      if (onTeam >= MAX_TEAM_CARS) return state;
+      const number = state.cpus.reduce((max, cpu) => Math.max(max, Number(cpu.id.slice(4)) || 0), 0) + 1;
+      const cpu: LobbyCpu = { id: `cpu-${number}`, name: `CPU ${number}`, team };
+      return withState(state, {
+        cpus: [...state.cpus, cpu],
+        announcement: `${cpu.name} added to ${team === 0 ? "BLUE" : "ORANGE"}`,
+      });
+    }
+    case "cpu/remove": {
+      if (state.phase !== "lobby") return state;
+      const cpu = state.cpus.find((entry) => entry.id === action.id);
+      if (!cpu) return state;
+      return withState(state, {
+        cpus: state.cpus.filter((entry) => entry.id !== action.id),
+        announcement: `${cpu.name} removed`,
+      });
+    }
+    case "cpu/team": {
+      if (state.phase !== "lobby") return state;
+      const team: LobbyTeam = action.team === 1 ? 1 : 0;
+      const cpu = state.cpus.find((entry) => entry.id === action.id);
+      if (!cpu || cpu.team === team) return state;
+      const onTeam =
+        state.players.filter((player) => player.team === team).length +
+        state.cpus.filter((entry) => entry.team === team).length;
+      if (onTeam >= MAX_TEAM_CARS) return state;
+      return withState(state, {
+        cpus: state.cpus.map((entry) => (entry.id === action.id ? { ...entry, team } : entry)),
+        announcement: `${cpu.name} moved to ${team === 0 ? "BLUE" : "ORANGE"}`,
+      });
+    }
+    case "cpu/clear": {
+      if (state.phase !== "lobby" || state.cpus.length === 0) return state;
+      return withState(state, { cpus: [], announcement: "CPUs cleared" });
+    }
+    default:
+      return null;
+  }
+};
+
 export const lobbyReducer = (state: LobbyState, action: LobbyAction): LobbyState => {
+  const cpuResult = reduceCpus(state, action);
+  if (cpuResult) return cpuResult;
+  // Everything else may change who is seated or how many seats there are.
+  return fitCpusToSeats(reduceLobby(state, action));
+};
+
+const reduceLobby = (state: LobbyState, action: LobbyAction): LobbyState => {
   switch (action.type) {
     case "room/set": {
       const roomCode = action.roomCode.trim().toUpperCase();
@@ -606,9 +686,8 @@ export const lobbyReducer = (state: LobbyState, action: LobbyAction): LobbyState
     }
 
     default: {
-      // Exhaustiveness guard: adding an action without a case is a type error.
-      const never: never = action;
-      return never;
+      // CPU actions are handled before this switch (`reduceCpus`).
+      return state;
     }
   }
 };

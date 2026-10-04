@@ -78,6 +78,19 @@ export interface LobbySettings {
 
 export type LobbyPhase = "lobby" | "playing" | "post-match";
 
+/**
+ * A seat the HOST gave to the computer. It is a lobby fact (a name on a team in
+ * the roster), not an Air Jam player: no phone, nothing to ready. The match
+ * director turns each one into a bot car. How well it plays comes from the
+ * lobby's bot difficulty.
+ */
+export interface LobbyCpu {
+  /** `cpu-1`, `cpu-2`... Never reused while the CPU exists. */
+  id: string;
+  name: string;
+  team: LobbyTeam;
+}
+
 export interface LobbyPlayer {
   /** Air Jam controller/player id. The identity key for reconnects. */
   id: string;
@@ -108,6 +121,8 @@ export interface LobbyState {
   joinUrl: string;
   phase: LobbyPhase;
   players: LobbyPlayer[];
+  /** Computer-controlled seats the host added. They count toward seats and teams. */
+  cpus: LobbyCpu[];
   /**
    * Players who left, retained so a phone that reloads or drops off Wi-Fi for a
    * moment comes back with the SAME name, team and car. Keyed by player id.
@@ -159,6 +174,10 @@ export type LobbyAction =
   | { type: "player/car"; id: string; carId: string | null }
   | { type: "player/ready"; id: string; ready: boolean }
   | { type: "roster/clearReady" }
+  | { type: "cpu/add"; team: LobbyTeam }
+  | { type: "cpu/remove"; id: string }
+  | { type: "cpu/team"; id: string; team: LobbyTeam }
+  | { type: "cpu/clear" }
   | { type: "settings/patch"; patch: Partial<Omit<LobbySettings, "tuning">> }
   | { type: "settings/eventMode"; enabled: boolean }
   | { type: "settings/tuning"; patch: Partial<EventTuning> }

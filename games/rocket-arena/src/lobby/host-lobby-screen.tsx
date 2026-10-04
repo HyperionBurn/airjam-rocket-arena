@@ -204,6 +204,10 @@ export const HostLobbyScreen = ({
               announcement={state.announcement}
               onChangeTeams={() => dispatch({ type: "lobby/reshuffleTeams" })}
               onClearReady={() => dispatch({ type: "roster/clearReady" })}
+              onAddCpu={(team) => dispatch({ type: "cpu/add", team })}
+              onRemoveCpu={(id) => dispatch({ type: "cpu/remove", id })}
+              onSwitchCpu={(id, team) => dispatch({ type: "cpu/team", id, team })}
+              canAddCpu={state.players.length + state.cpus.length < state.settings.playerSlots}
             />
           </div>
 
@@ -230,7 +234,7 @@ export const HostLobbyScreen = ({
                   </button>
                 )}
                 <p className="lobby-start__reason" role="status">
-                  {startReason(state.phase, counts.blue + counts.orange, state.players)}
+                  {startReason(state.phase, counts.blue + counts.orange, state.players, state.cpus.length)}
                 </p>
               </div>
             </LobbySettingsPanel>
@@ -250,12 +254,13 @@ const startReason = (
   phase: string,
   seated: number,
   players: { ready: boolean }[],
+  cpus: number,
 ): string => {
   if (phase !== "lobby") {
     return "";
   }
   if (seated === 0) {
-    return "Scan to join";
+    return cpus > 0 ? "Scan to join - CPUs need a player" : "Scan to join";
   }
   const ready = players.filter((player) => player.ready).length;
   return ready === players.length ? "" : `${ready} of ${players.length} ready`;

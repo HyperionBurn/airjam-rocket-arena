@@ -19,7 +19,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useAirJamHost } from "@air-jam/sdk";
 
-import { selectCarBindingIntents, type LobbyStore } from "@/lobby";
+import { selectCarBindingIntents, selectCpuTeams, type LobbyStore } from "@/lobby";
 import { MatchHud, type HudSeatInfo } from "@/host/match-hud";
 import {
   launchLocalMatch,
@@ -130,7 +130,7 @@ export const MatchDirector = ({ runtime, controller, store, onActiveChange }: Ma
     const sdkNames = new Map(playersRef.current.map((player) => [player.id, player.label]));
     setSeatNames(
       seatsRef.current.map((seat) => ({
-        name: seat.playerId ? (lobbyNames.get(seat.playerId) ?? sdkNames.get(seat.playerId) ?? "Player") : "Bot",
+        name: seat.playerId ? (lobbyNames.get(seat.playerId) ?? sdkNames.get(seat.playerId) ?? "Player") : "CPU",
       })),
     );
   };
@@ -164,14 +164,19 @@ export const MatchDirector = ({ runtime, controller, store, onActiveChange }: Ma
         try {
           const intents = selectCarBindingIntents(state);
           const difficulty = BOT_FOR_DIFFICULTY[state.settings.botDifficulty];
-          const botTeams =
+          // The host's own CPU seats first, then (bot fill) enough extra bots to
+          // bring both teams up to the team size. CPUs count as cars already on
+          // the team, so fill never doubles them up.
+          const cpuTeams = selectCpuTeams(state);
+          const fillTeams =
             state.settings.botFill === "fill"
               ? planBotCars(
-                  intents.map((intent) => intent.team),
+                  [...intents.map((intent) => intent.team), ...cpuTeams],
                   state.settings.teamSize,
                   controller.maxCars,
                 )
               : [];
+          const botTeams = [...cpuTeams, ...fillTeams];
           const result = await launchLocalMatch(
             runtime,
             controller,
@@ -188,7 +193,7 @@ export const MatchDirector = ({ runtime, controller, store, onActiveChange }: Ma
           botDriver.current = result.bots;
           botDifficulty.current = difficulty;
           botSkill.current = state.settings.botDifficulty;
-          botsWanted.current = state.settings.botFill === "fill";
+          botsWanted.current = state.settings.botFill === "fill" || cpuTeams.length > 0;
           postMatchDelay.current = POST_MATCH_DELAY_MS[state.settings.tuning.postMatchScreen === "short" ? "short" : "full"];
           lastCarOf.current.clear();
           seatsRef.current = result.teams.map((team, car) => ({ playerId: result.seats[car] ?? null, team }));

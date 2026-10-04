@@ -24,6 +24,8 @@ export interface LobbyRosterRow {
   carLabel: string;
   /** 1-based position in join order; also the tie-break for AUTO. */
   seat: number;
+  /** A computer-controlled seat the host added (always ready, can be removed). */
+  cpu?: boolean;
 }
 
 const carLabelFor = (carId: string | null): string => {
@@ -36,6 +38,19 @@ const carLabelFor = (carId: string | null): string => {
 /** Roster rows in stable join order, plus empty seat placeholders. */
 export const selectRoster = (state: LobbyState): LobbyRosterRow[] => {
   const rows = state.players.map((player) => toRosterRow(player));
+  for (const cpu of state.cpus) {
+    rows.push({
+      id: cpu.id,
+      name: cpu.name,
+      team: cpu.team,
+      teamLabel: TEAM_LABELS[cpu.team],
+      teamColor: TEAM_COLORS[cpu.team],
+      ready: true,
+      carLabel: "CPU",
+      seat: rows.length + 1,
+      cpu: true,
+    });
+  }
   const empty = Math.max(0, state.settings.playerSlots - rows.length);
   for (let index = 0; index < empty; index += 1) {
     rows.push({
@@ -46,7 +61,7 @@ export const selectRoster = (state: LobbyState): LobbyRosterRow[] => {
       teamColor: "#64748b",
       ready: false,
       carLabel: "",
-      seat: rows.length + index + 1,
+      seat: rows.length + 1,
     });
   }
   return rows;
@@ -72,12 +87,20 @@ export const selectCapacity = (state: LobbyState): number => state.settings.play
 
 /** The headline: `"2 / 4 PLAYERS JOINED"`. */
 export const selectJoinCountLabel = (state: LobbyState): string =>
-  `${selectJoinedCount(state)} / ${selectCapacity(state)} PLAYERS JOINED`;
+  `${selectJoinedCount(state)} / ${selectCapacity(state)} PLAYERS JOINED${
+    state.cpus.length > 0 ? ` + ${state.cpus.length} CPU` : ""
+  }`;
 
+/** Humans plus CPUs, per team: what the match will actually field before bot fill. */
 export const selectTeamScoreLabel = (state: LobbyState): string => {
   const counts = selectTeamCounts(state);
-  return `BLUE ${counts.blue} — ORANGE ${counts.orange}`;
+  const blue = counts.blue + state.cpus.filter((cpu) => cpu.team === 0).length;
+  const orange = counts.orange + state.cpus.filter((cpu) => cpu.team === 1).length;
+  return `BLUE ${blue} — ORANGE ${orange}`;
 };
+
+/** Teams of the host's CPU seats, in roster order. */
+export const selectCpuTeams = (state: LobbyState): LobbyTeam[] => state.cpus.map((cpu) => cpu.team);
 
 export const selectReadinessState = (state: LobbyState): LobbyReadiness => selectReadiness(state);
 

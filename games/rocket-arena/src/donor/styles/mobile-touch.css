@@ -1,0 +1,348 @@
+/*
+ * Field Console: an original, low-profile mobile control surface.
+ * Actions use plain language and geometric affordances instead of borrowed
+ * controller art or a recognizable car-soccer control layout.
+ */
+body.touch-controls-enabled {
+  overscroll-behavior: none;
+  background: #071321;
+}
+
+body.touch-controls-enabled .touch-controls {
+  --touch-ink: #071827;
+  --touch-panel: #102a3dba;
+  --touch-line: #91c9d566;
+  --touch-text: #effaff;
+  --touch-muted: #b9d4dc;
+  --touch-energy: #f4cf73;
+}
+
+body.touch-controls-enabled .touch-stick-zone {
+  border: 1px solid var(--touch-line);
+  border-radius: 32%;
+  overflow: visible;
+  background:
+    linear-gradient(90deg, transparent 49.3%, #a9d6dd2b 49.5% 50.5%, transparent 50.7%),
+    linear-gradient(0deg, transparent 49.3%, #a9d6dd2b 49.5% 50.5%, transparent 50.7%),
+    linear-gradient(135deg, #183b4ebd, #0a1e2fbd);
+  box-shadow: 0 8px 18px #02080f59, inset 0 0 0 7px #b6e5ed08;
+}
+
+body.touch-controls-enabled .touch-stick-zone::before,
+body.touch-controls-enabled .touch-stick-zone::after {
+  position: absolute;
+  z-index: 3;
+  color: var(--touch-muted);
+  font: 700 8px/1 var(--sans);
+  letter-spacing: .15em;
+  pointer-events: none;
+}
+
+body.touch-controls-enabled .touch-stick-zone::before {
+  content: "STEER";
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+body.touch-controls-enabled .touch-stick-zone::after {
+  content: "DRIVE";
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+body.touch-controls-enabled .touch-stick-zone__label {
+  display: none;
+}
+
+body.touch-controls-enabled .touch-stick-zone .back,
+body.touch-controls-enabled .touch-stick-zone .front {
+  border-radius: 26% !important;
+  border: 1px solid #c3edf080 !important;
+  box-shadow: none !important;
+}
+
+body.touch-controls-enabled .touch-stick-zone .back {
+  background: #102b3dae !important;
+}
+
+body.touch-controls-enabled .touch-stick-zone .front {
+  background: #d5f4f16b !important;
+}
+
+body.touch-controls-enabled .touch-button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--touch-line);
+  border-radius: 18px;
+  color: var(--touch-text);
+  background: linear-gradient(145deg, #21495bbd, #0b2133d9);
+  box-shadow: 0 6px 14px #02091057, inset 0 1px #d6faff20;
+  font-family: var(--sans);
+  letter-spacing: 0;
+  text-transform: none;
+  transform: none;
+  transition: background-color .12s linear, border-color .12s linear, color .12s linear;
+}
+
+body.touch-controls-enabled .touch-button:hover {
+  color: var(--touch-text);
+  border-color: #d1fbffb3;
+}
+
+body.touch-controls-enabled .touch-button:focus-visible {
+  outline: 3px solid #ffe294;
+  outline-offset: 3px;
+}
+
+body.touch-controls-enabled .touch-button.is-active {
+  color: #15202a;
+  border-color: #fff0b4;
+  background: linear-gradient(145deg, #ffe394, #dfaa50);
+  box-shadow: 0 2px 8px #02091073, inset 0 1px #fff9dc;
+  transform: translateY(2px);
+}
+
+body.touch-controls-enabled .touch-button__glyph {
+  display: block;
+  font: 500 clamp(17px, 3.8vmin, 25px)/.85 var(--sans);
+}
+
+body.touch-controls-enabled .touch-button__label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  font: 800 clamp(8px, 1.6vmin, 10px)/1 var(--sans);
+  letter-spacing: .09em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+body.touch-controls-enabled .touch-button--jump {
+  border-radius: 24px 24px 14px 14px;
+  background: linear-gradient(145deg, #28566b, #10283c);
+}
+
+body.touch-controls-enabled .touch-button--boost {
+  border-radius: 14px 24px 24px 14px;
+  color: #fff3c7;
+  border-color: #e9c9689e;
+  background: linear-gradient(145deg, #725931d9, #2b3026e6);
+}
+
+body.touch-controls-enabled .touch-button--boost .touch-button__glyph {
+  transform: rotate(-8deg);
+}
+
+body.touch-controls-enabled .touch-button--handbrake {
+  border-radius: 14px 14px 22px 22px;
+}
+
+body.touch-controls-enabled .touch-button--cam,
+body.touch-controls-enabled .touch-button--reset,
+body.touch-controls-enabled .touch-button--roll {
+  border-radius: 12px;
+}
+
+body.touch-controls-enabled .touch-button--cam {
+  color: #d8f6ff;
+  background: #123448d9;
+}
+
+body.touch-controls-enabled .touch-button--reset {
+  color: #d8f6ff;
+  background: #102638de;
+}
+
+body.touch-controls-enabled .touch-button--roll .touch-button__glyph {
+  font-size: 18px;
+}
+
+body.touch-controls-enabled .touch-ball-actions {
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid #9cced04d;
+  border-radius: 16px;
+  background: #0a2030c9;
+  box-shadow: 0 5px 13px #0209104d;
+}
+
+body.touch-controls-enabled .touch-ball-actions .touch-button {
+  min-height: 42px;
+  border-radius: 10px;
+  font: 800 9px/1 var(--sans);
+  letter-spacing: .07em;
+}
+
+/* Touch HUD: simple live values; intentionally no imported component artwork. */
+body.touch-controls-enabled #app .boost.arcade-boost,
+#app[data-input-method="touch"] .boost.arcade-boost {
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  bottom: auto;
+  left: auto;
+  width: 76px;
+  height: 50px;
+  aspect-ratio: auto;
+  border: 1px solid #99d1d578;
+  border-radius: 14px;
+  background: #0b2434d9;
+  box-shadow: 0 5px 12px #01070d55;
+}
+
+body.touch-controls-enabled .arcade-boost__dial,
+body.touch-controls-enabled .arcade-boost__fill,
+#app[data-input-method="touch"] .arcade-boost__dial,
+#app[data-input-method="touch"] .arcade-boost__fill {
+  background: none;
+  mask-image: none;
+  -webkit-mask-image: none;
+}
+
+body.touch-controls-enabled .arcade-boost__dial::before,
+#app[data-input-method="touch"] .arcade-boost__dial::before {
+  content: "ENERGY";
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: 100%;
+  color: #b8d6d8;
+  font: 800 7px/1 var(--sans);
+  letter-spacing: .14em;
+  text-align: center;
+}
+
+body.touch-controls-enabled .arcade-boost__fill,
+#app[data-input-method="touch"] .arcade-boost__fill {
+  top: auto;
+  right: 11px;
+  bottom: 8px;
+  left: 11px;
+  width: auto;
+  height: 4px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: #ffffff1a !important;
+}
+
+body.touch-controls-enabled .arcade-boost__fill::after,
+#app[data-input-method="touch"] .arcade-boost__fill::after {
+  content: "";
+  display: block;
+  width: var(--boost-level, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: #f3d371;
+}
+
+body.touch-controls-enabled .arcade-boost__number,
+#app[data-input-method="touch"] .arcade-boost__number {
+  inset: 17px 0 auto;
+  height: 20px;
+  color: #fff3c5;
+  font: 800 19px/1 var(--sans);
+  letter-spacing: -.03em;
+  text-shadow: none;
+  transform: none;
+}
+
+body.touch-controls-enabled #app .match-scoreboard,
+#app[data-input-method="touch"] .match-scoreboard {
+  top: max(10px, env(safe-area-inset-top));
+  left: 50%;
+  right: auto;
+  width: 172px;
+  height: 42px;
+  aspect-ratio: auto;
+  transform: translateX(-50%);
+  border: 1px solid #9ccfd363;
+  border-radius: 14px;
+  background: #0b2434df;
+  box-shadow: 0 5px 12px #01070d4a;
+}
+
+body.touch-controls-enabled #app .match-scoreboard__score,
+#app[data-input-method="touch"] .match-scoreboard__score {
+  top: 11px;
+  width: 29%;
+  color: #f4fbfc;
+  font: 800 19px/1 var(--sans);
+  letter-spacing: 0;
+  transform: none;
+}
+
+body.touch-controls-enabled #app .match-scoreboard__team--orange .match-scoreboard__score,
+#app[data-input-method="touch"] .match-scoreboard__team--orange .match-scoreboard__score { left: 4%; }
+body.touch-controls-enabled #app .match-scoreboard__team--blue .match-scoreboard__score,
+#app[data-input-method="touch"] .match-scoreboard__team--blue .match-scoreboard__score { right: 4%; }
+
+body.touch-controls-enabled #app .match-scoreboard__time,
+#app[data-input-method="touch"] .match-scoreboard__time {
+  top: 13px;
+  left: 32%;
+  width: 36%;
+  color: #d9edf0;
+  font: 700 13px/1 var(--sans);
+  letter-spacing: .04em;
+}
+
+body.touch-controls-enabled #app .match-scoreboard__period,
+#app[data-input-method="touch"] .match-scoreboard__period { display: none; }
+
+body.touch-controls-enabled #app .ball-cam-indicator,
+#app[data-input-method="touch"] .ball-cam-indicator {
+  /* View is a direct, labeled control on touch; a second status chip obscures it. */
+  display: none !important;
+}
+
+body.touch-controls-enabled #app .ball-cam-indicator::after,
+#app[data-input-method="touch"] .ball-cam-indicator::after { display: none; }
+
+body.touch-controls-enabled #app .hud-tools,
+#app[data-input-method="touch"] .hud-tools {
+  top: max(10px, env(safe-area-inset-top));
+  right: calc(max(10px, env(safe-area-inset-right)) + 84px);
+}
+
+body.touch-controls-enabled #app #settings-button,
+#app[data-input-method="touch"] #settings-button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #9dced270;
+  border-radius: 12px;
+  background: #0b2434d9;
+}
+
+body.touch-controls-enabled #app #settings-button::before {
+  width: 14px;
+  height: 16px;
+  border-color: #dff5f7;
+}
+
+@media (orientation: portrait) {
+  body.touch-controls-enabled .touch-stick-zone::before { top: 8px; }
+  body.touch-controls-enabled .touch-stick-zone::after { bottom: 8px; }
+  body.touch-controls-enabled #app .match-scoreboard,
+  #app[data-input-method="touch"] .match-scoreboard { width: min(164px, calc(100vw - 184px)); }
+  body.touch-controls-enabled #app .ball-cam-indicator,
+  #app[data-input-method="touch"] .ball-cam-indicator { bottom: calc(max(10px, env(safe-area-inset-bottom)) + clamp(124px, 29vmin, 158px) + 10px); }
+}
+
+@media (max-width: 380px) {
+  body.touch-controls-enabled .touch-button__label { font-size: 7px; }
+  body.touch-controls-enabled .touch-button__glyph { font-size: 16px; }
+  body.touch-controls-enabled #app .boost.arcade-boost,
+  #app[data-input-method="touch"] .boost.arcade-boost { width: 68px; }
+  body.touch-controls-enabled #app .hud-tools,
+  #app[data-input-method="touch"] .hud-tools { right: calc(max(8px, env(safe-area-inset-right)) + 74px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.touch-controls-enabled .touch-button { transition: none; }
+}

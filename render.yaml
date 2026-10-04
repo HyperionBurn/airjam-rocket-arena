@@ -1,0 +1,32 @@
+# Render Blueprint for the Rocket Arena demo (server + static game).
+# Replace the two onrender.com hostnames if Render assigns different ones.
+services:
+  - type: web
+    name: airjam-rocket-server
+    runtime: docker
+    plan: free
+    dockerfilePath: ./packages/server/Dockerfile
+    dockerContext: .
+    healthCheckPath: /ready
+    envVars:
+      - key: AIR_JAM_AUTH_MODE
+        value: disabled
+      - key: AIR_JAM_ALLOWED_ORIGINS
+        value: https://airjam-rocket-arena.onrender.com
+  - type: web
+    name: airjam-rocket-arena
+    runtime: static
+    buildCommand: >-
+      npm i -g pnpm@9.9.0 &&
+      pnpm install --frozen-lockfile --filter "rocket-arena..." &&
+      pnpm --filter @air-jam/sdk build &&
+      pnpm --filter rocket-arena exec vite build &&
+      node games/rocket-arena/tools/render-postbuild.mjs
+    staticPublishPath: games/rocket-arena/dist
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: VITE_AIR_JAM_SERVER_URL
+        value: https://airjam-rocket-server.onrender.com
+      - key: VITE_AIR_JAM_APP_ID
+        value: rocket-arena-demo

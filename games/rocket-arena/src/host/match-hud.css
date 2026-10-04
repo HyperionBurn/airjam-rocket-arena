@@ -1,0 +1,218 @@
+/*
+ * In-match HUD for the shared projector screen.
+ *
+ * Everything is positioned in CSS pixels from the donor's own viewport
+ * rectangles, so it stays glued to the right split-screen tile at any window
+ * size. The layer is pointer-transparent: it must never swallow a click meant
+ * for the donor canvas or the goal-replay SKIP button.
+ */
+.ra-hud {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  pointer-events: none;
+  font-family: "Archivo", system-ui, sans-serif;
+  color: #fff;
+  --ra-blue: #55baff;
+  --ra-orange: #ffab47;
+}
+
+.ra-hud__divider {
+  position: absolute;
+  background: #02101f;
+  box-shadow: 0 0 0 1px #ffffff1f;
+}
+
+.ra-hud__tile {
+  position: absolute;
+  overflow: hidden;
+}
+
+.ra-hud__name {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 34%;
+  padding: 5px 12px 5px 8px;
+  border-radius: 999px;
+  background: #02101fb3;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.ra-hud__dot {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--team);
+  box-shadow: 0 0 10px var(--team);
+}
+
+.ra-hud__cam {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: #02101fb3;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #cfe6ff;
+}
+
+.ra-hud__boost {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.ra-hud__boost-value {
+  font-size: 34px;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 2px 8px #000a;
+}
+
+.ra-hud__boost-bar {
+  width: clamp(90px, 14vw, 180px);
+  height: 10px;
+  border-radius: 6px;
+  background: #02101fb3;
+  overflow: hidden;
+}
+
+.ra-hud__boost-fill {
+  height: 100%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #ff8a1f, #ffd23f);
+  transition: width 90ms linear;
+}
+
+.ra-hud__boost[data-boosting="true"] .ra-hud__boost-fill {
+  background: linear-gradient(90deg, #ffd23f, #fffbe0);
+  box-shadow: 0 0 12px #ffd23f;
+}
+
+.ra-hud__speed {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  font-size: 22px;
+  font-weight: 800;
+  text-shadow: 0 2px 8px #000a;
+}
+
+.ra-hud__speed small {
+  margin-left: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  opacity: 0.75;
+}
+
+.ra-hud__score {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-width: 260px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #02101fe6;
+  box-shadow: 0 6px 24px #0008;
+  font-weight: 800;
+}
+
+.ra-hud__team {
+  padding: 6px 18px;
+  font-size: 30px;
+  text-align: center;
+}
+
+.ra-hud__team[data-team="0"] {
+  background: #1f6fb0;
+}
+
+.ra-hud__team[data-team="1"] {
+  background: #c4731a;
+}
+
+.ra-hud__clock {
+  padding: 6px 16px;
+  min-width: 92px;
+  text-align: center;
+  font-size: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ra-hud__clock[data-overtime="true"] {
+  color: #ffd23f;
+}
+
+.ra-hud__banner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  text-shadow: 0 4px 24px #000c;
+}
+
+.ra-hud__countdown {
+  font-size: min(26vh, 220px);
+  font-weight: 900;
+  line-height: 1;
+  animation: ra-hud-pop 1s ease-out infinite;
+}
+
+.ra-hud__result {
+  padding: 22px 48px;
+  border-radius: 18px;
+  background: #02101fd9;
+  font-size: min(9vh, 72px);
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.ra-hud__result small {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.34em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  opacity: 0.8;
+}
+
+@keyframes ra-hud-pop {
+  from {
+    transform: scale(1.25);
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.ra-hud[data-replay="true"] .ra-hud__tile,
+.ra-hud[data-replay="true"] .ra-hud__divider,
+.ra-hud[data-replay="true"] .ra-hud__score {
+  display: none;
+}

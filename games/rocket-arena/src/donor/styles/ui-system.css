@@ -1,0 +1,110 @@
+/* Shared component language from the supplied Rocket menu references.
+   Static CSS chrome only; illustration lives in optimized raster assets. */
+:root {
+  --rl-font: "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
+  --rl-navy: #02172e;
+  --rl-panel: #03284a;
+  --rl-blue: #075acb;
+  --rl-cyan: #80dcff;
+  --rl-white: #d8f3ff;
+}
+#app :is(.sheet,.car-dialog,.match-panel,.touch-editor-tools) {
+  --ink-0: #02172e; --ink-1: #03284a; --ink-2: #064272; --ink-3: #075b96;
+  --graphite: #f5fbff; --graphite-2: #acd2ec; --mark: #80dcff; --mark-text: #d8f3ff;
+  --outline: #064272; --line-1: #174b71; --line-2: #20577e; --line-3: #3b769d;
+  --well: #02172e; --focus: #80dcff; --display: var(--rl-font);
+  font-family: var(--rl-font);
+  background: #03284af5; color: #f5fbff;
+  border: 1px solid #3278a5; border-top: 3px solid #80dcff;
+  border-radius: 0; box-shadow: 0 12px 36px #00132640;
+  backdrop-filter: none;
+}
+#app :is(.sheet-overlay,.car-overlay,.match-overlay) { background-color: #02172e94; backdrop-filter: none; }
+#app .sheet-overlay.is-aside { background-color: #02172e25; }
+#app :is(.sheet-head,.car-dialog__head,.match-panel__head) {
+  background: #03284a; border-bottom: 1px solid #256b98;
+  border-radius: 0; box-shadow: none;
+}
+#app :is(.sheet-head h1,.car-dialog__head h2,.match-panel__head h2) {
+  color: white; font: italic 900 clamp(28px,3.5vw,42px)/1 var(--rl-font);
+  letter-spacing: .015em; text-shadow: none;
+}
+#app :is(.sheet-head__ident > .ui-icon,.sheet-tab > .ui-icon) { display: none; }
+#app :is(.sheet-head__close,.match-panel__close) {
+  background: #064272; border: 1px solid #377daa; border-radius: 0;
+  box-shadow: none; color: #d8f3ff;
+}
+#app :is(.sheet-head__close,.match-panel__close):hover { background: #075acb; transform: none; }
+#app .sheet-tabs { padding: 8px 12px 0; gap: 4px; border-bottom: 2px solid #80dcff; background: #02172e; }
+#app .sheet-tab {
+  min-height: 48px; border: 0; border-radius: 0; padding: 10px 12px;
+  color: #b8d9ef; background: #064272; font: italic 900 16px/1.2 var(--rl-font);
+  text-transform: uppercase; box-shadow: none;
+}
+#app .sheet-tab.is-active { color: #06498b; background: #d8f3ff; box-shadow: none; }
+#app .sheet-tab:hover { color: #06498b; background: #80dcff; }
+#app :is(.zone__label,.parts-head__title,.touch-settings-section > summary) { font-family: var(--rl-font); font-weight: 900; font-style: italic; text-transform: uppercase; }
+#app .zone__letter { border-radius: 0; background: #075acb; color: white; box-shadow: none; }
+#app .dim:hover { background: #06427280; }
+#app :is(.figure,.pick,.chip,.tick__mark,.theme-option,.car-card,.car-card__equipped,.car-card__status,.match-difficulty__option,.match-opponent,.match-current,.match-panel__error) { border-radius: 0; box-shadow: none; }
+#app :is(.pick,.chip) { background-color: #02172e; color: #e9f8ff; border: 1px solid #377daa; }
+#app .pick { min-height: 40px; }
+#app .pick option { background: #03284a; color: white; }
+#app .tick__mark { background: #02172e; border-color: #377daa; }
+#app .tick:checked + .tick__mark { background: #80dcff; border-color: #d8f3ff; }
+#app .dim__line::-webkit-slider-thumb { border-radius: 0; box-shadow: none; background: #80dcff; border-color: #d8f3ff; }
+#app .dim__line::-moz-range-thumb { border-radius: 0; box-shadow: none; background: #80dcff; border-color: #d8f3ff; }
+#app :is(.act,.match-action) {
+  min-height: 44px; border: 1px solid #3278a5; border-radius: 0;
+  padding-inline: 20px; background: #064272; color: #f5fbff;
+  box-shadow: none; font: italic 900 17px/1.2 var(--rl-font); text-transform: uppercase;
+}
+#app :is(.act--primary,.match-action--primary) { background: #d8f3ff; color: #06498b; border-color: #80dcff; }
+#app :is(.act,.match-action):hover:not(:disabled) { background: #80dcff; color: #06498b; box-shadow: none; transform: none; }
+#app :is(.title-block,.car-dialog__foot,.match-panel__footer) { background: #02172e; border-top: 1px solid #256b98; }
+#app .sheet-handle { border-radius: 0; background: #80dcff; border-width: 1px; }
+#app .car-grid { gap: 12px; }
+#app .car-card { border: 2px solid #226c9a; background: #03284a; transition: border-color .12s; }
+#app .car-card:hover { transform: none; border-color: #d8f3ff; box-shadow: none; }
+#app .car-card.is-selected { border-color: #80dcff; box-shadow: none; }
+#app .car-card__stage { background: #07518a; }
+#app .car-card__stage::before, #app .car-card__stage::after { display: none; }
+#app .car-card__body { background: #03284a; border-top: 1px solid #226c9a; }
+#app .car-card__name { font: italic 900 24px/1.1 var(--rl-font); letter-spacing: .02em; color: #fff; }
+#app .car-card.is-selected .car-card__body { background: #d8f3ff; color: #06498b; }
+#app .car-card.is-selected :is(.car-card__name,.car-card__action) { color: #06498b; }
+#app .car-card__equipped { background: #80dcff; color: #06498b; border: 0; }
+#app .theme-option { border-width: 2px; }
+#app .theme-option__name { font: italic 900 22px/1.2 var(--rl-font); }
+#app .theme-option__sample { background: #064272; }
+#app .theme-option__sample > .ui-icon { display: none; }
+#app .match-difficulty__option { background: #064272; border: 1px solid #3278a5; }
+#app .match-difficulty__option[aria-pressed="true"] { color: #06498b; background: #d8f3ff; border-color: #80dcff; box-shadow: none; }
+#app .match-difficulty__name { font-family: var(--rl-font); font-style: italic; }
+#app .match-difficulty__rank { color: inherit; }
+#app :is(.sheet,.car-dialog,.match-panel) :is(button,a,input,select):focus-visible { outline: 2px solid #d8f3ff; outline-offset: 3px; }
+#loading {
+  background: #102d51 url('/assets/ui/arena-loading.webp') center / cover no-repeat;
+  place-content: center; justify-items: center;
+  padding: clamp(24px,6vw,90px); gap: 16px; text-align: center;
+  font-family: var(--rl-font);
+}
+#loading .load__panel { align-items: center; text-align: center; }
+#loading .load__progress-block { align-self: center; width: min(360px, 70vw); margin-inline: auto; text-align: center; }
+#loading .load__status-row { justify-content: center; }
+#loading .load__emblem { display: none; }
+#loading .load__title { max-width: 80vw; font: italic 900 clamp(34px,6vw,78px)/.95 var(--rl-font); letter-spacing: -.02em; transform: none; -webkit-text-stroke: 0; text-shadow: 0 2px 4px #02172e; }
+#loading .load__title span { color: #80dcff; }
+#loading .load__label { margin-top: 14px; color: white; font: italic 900 20px/1.3 var(--rl-font); text-shadow: 0 1px 3px #02172e; }
+#loading .load__rule { height: 16px; border: 1px solid #ffffff6b; border-radius: 999px; background: #02172ebd; width: 100%; margin-inline: auto; }
+#loading .load__rule::after { background: #80dcff; box-shadow: none; }
+#loading .load__note { box-sizing: border-box; width: 100%; color: #d8f3ff; margin-inline: auto; background: #02172eac; padding: 8px 10px; font-size: 12px; text-align: center; }
+#loading[data-state="error"] .load__label { color: #ffcf89; }
+@media (max-width: 600px) {
+  #app .sheet-tab { padding-inline: 8px; font-size: 12px; }
+  #loading { background-position: 60% center; place-content: center; padding-top: 24px; }
+  #loading .load__title { max-width: 80vw; }
+  #loading .load__note { max-width: 80vw; }
+  #loading .load__progress-block { width: 65vw; }
+}
+@media (prefers-reduced-motion: reduce) { #loading .load__rule::after { animation: none; transform: none; width: 60%; } }

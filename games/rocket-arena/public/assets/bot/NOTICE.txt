@@ -1,0 +1,20 @@
+Nexto - by the Necto team / Rolv-Arild and contributors
+
+Source: https://github.com/Rolv-Arild/Necto
+Revision: 2e6ed7d6ed2b352e8ff529d4a12a0c9c70c28cca
+Original checkpoint: rlbot-support/Nexto/nexto-model.pt
+
+License: Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+https://creativecommons.org/licenses/by-nc-sa/4.0/
+Full license: LICENSE.txt (in this directory)
+
+Car Soccer modifications: converted the original TorchScript policy to ONNX;
+ported its observation builder, discrete action table and kickoff routine to
+TypeScript; adapted native physics state for local 1v1 browser play.
+The converted policy and adapted code retain CC BY-NC-SA 4.0.
+No author endorsement or verified rank in Car Soccer is implied.
+
+This license does not grant unrestricted commercial use. Obtain separate
+permission from the rights holders before using these materials commercially.
+
+Pinned checkpoint/export hashes and numerical validation: metadata.json.

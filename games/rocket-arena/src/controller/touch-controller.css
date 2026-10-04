@@ -1,0 +1,590 @@
+/*
+ * Rocket Arena phone controls — layout + gesture suppression.
+ *
+ * Written as plain co-located CSS rather than utility classes on purpose. This
+ * game's `src/index.css` is owned by another worker and does not currently
+ * `@import "tailwindcss"`, so a utility-class component here would ship with no
+ * styles at all. The control surface also has to guarantee a very specific set
+ * of vendor properties (`touch-action`, `-webkit-touch-callout`,
+ * `overscroll-behavior`) that read far better as one declared block than as
+ * scattered utilities.
+ *
+ * Every rule is namespaced under `.ra-tc-`. Nothing here can reach the donor
+ * stage (`#app`) or the host status layer (`#root`), both of which are outside
+ * this subtree.
+ *
+ * ---------------------------------------------------------------------------
+ * GESTURE SUPPRESSION (the "disable scroll / selection / zoom / callouts" req)
+ * ---------------------------------------------------------------------------
+ *   touch-action: none            scroll, pinch-zoom and double-tap-zoom
+ *   overscroll-behavior: none     pull-to-refresh and scroll chaining
+ *   user-select / -webkit-user-select: none   long-press text selection
+ *   -webkit-touch-callout: none   long-press context menu on iOS
+ *   -webkit-tap-highlight-color   no grey flash on press
+ * The lobby's text field deliberately opts back IN: a player who cannot
+ * select or edit their name is a worse bug than a stray long-press.
+ * Safari's proprietary `gesture*` events are blocked in JS, not CSS — see
+ * `use-touch-input.ts`.
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Root                                                                        */
+/* -------------------------------------------------------------------------- */
+
+.ra-tc {
+  position: fixed;
+  inset: 0;
+  /* The shell's `#root` is pointer-transparent (it is an overlay layer on the
+     projector). `pointer-events` inherits, so without this every touch on the
+     phone fell straight through to <body> and the controller was inert. */
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 80% at 50% 0%, #0d2a40 0%, #071321 58%, #04101d 100%);
+  color: #effaff;
+  font-family:
+    ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+
+  /* Gesture suppression. `touch-action: none` is the load-bearing one. */
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ra-tc *,
+.ra-tc *::before,
+.ra-tc *::after {
+  box-sizing: border-box;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Gameplay: two thumbs, one per half                                          */
+/* -------------------------------------------------------------------------- */
+
+.ra-tc-gameplay {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: env(safe-area-inset-left) env(safe-area-inset-right);
+  padding:
+    max(10px, env(safe-area-inset-top))
+    max(10px, env(safe-area-inset-right))
+    max(10px, env(safe-area-inset-bottom))
+    max(10px, env(safe-area-inset-left));
+}
+
+.ra-tc-half {
+  display: flex;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  align-items: flex-end;
+}
+
+.ra-tc-half--left {
+  justify-content: flex-start;
+}
+
+.ra-tc-half--right {
+  justify-content: flex-end;
+}
+
+/* -------------------------------------------------------------------------- */
+/* LEFT THUMB — analog stick                                                   */
+/* -------------------------------------------------------------------------- */
+
+.ra-tc-stick {
+  position: relative;
+  width: min(44vmin, 40vh, 100%);
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  border: 1px solid rgb(145 201 213 / 38%);
+  border-radius: 50%;
+  background:
+    linear-gradient(90deg, transparent 49.4%, rgb(169 214 221 / 16%) 49.6% 50.4%, transparent 50.6%),
+    linear-gradient(0deg, transparent 49.4%, rgb(169 214 221 / 16%) 49.6% 50.4%, transparent 50.6%),
+    radial-gradient(circle at 50% 50%, rgb(24 59 78 / 78%) 0%, rgb(10 30 47 / 72%) 100%);
+  box-shadow:
+    0 8px 18px rgb(2 8 15 / 35%),
+    inset 0 0 0 6px rgb(182 229 237 / 3%);
+  cursor: grab;
+}
+
+/* Air context is visible on the pad itself, not only in a toast: the two
+   labels swap, so the player can tell at a glance which axis they are pushing. */
+.ra-tc-stick__label {
+  position: absolute;
+  left: 50%;
+  font: 800 clamp(7px, 1.5vmin, 10px) / 1 inherit;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgb(185 212 220 / 82%);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.ra-tc-stick__label--top {
+  top: 9%;
+}
+
+.ra-tc-stick__label--bottom {
+  bottom: 9%;
+}
+
+.ra-tc-stick__knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44%;
+  height: 44%;
+  border: 1px solid rgb(195 237 240 / 60%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, rgb(213 244 241 / 34%) 0%, rgb(16 43 61 / 86%) 100%);
+  box-shadow:
+    0 4px 12px rgb(2 9 16 / 55%),
+    inset 0 1px 0 rgb(214 250 255 / 16%);
+  /* `transform` is written imperatively on pointermove — see use-touch-input.ts. */
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* -------------------------------------------------------------------------- */
+/* RIGHT THUMB — button cluster                                                */
+/* -------------------------------------------------------------------------- */
+
+.ra-tc-cluster {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  grid-template-areas:
+    "drift boost"
+    "drift jump"
+    "cam   rev";
+  gap: clamp(6px, 1.4vmin, 12px);
+  align-items: end;
+  justify-items: end;
+  flex: 0 0 auto;
+}
+
+.ra-tc-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 4px 6px;
+  border: 1px solid rgb(145 201 213 / 40%);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgb(33 73 91 / 75%), rgb(11 33 51 / 85%));
+  box-shadow:
+    0 6px 14px rgb(2 9 16 / 34%),
+    inset 0 1px 0 rgb(214 250 255 / 12%);
+  color: #effaff;
+  font: inherit;
+  /* Belt-and-braces with the JS capture: a button is a control, never a target. */
+  touch-action: none;
+  cursor: pointer;
+  transition:
+    transform 90ms linear,
+    background-color 120ms linear,
+    border-color 120ms linear;
+}
+
+.ra-tc-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ra-tc-btn__glyph {
+  display: block;
+  font: 500 clamp(15px, 3.2vmin, 22px) / 0.9 inherit;
+}
+
+.ra-tc-btn__label {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  font: 800 clamp(7px, 1.4vmin, 9px) / 1 inherit;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Primary thumb reach: BOOST and JUMP are the two things pressed most, and they
+   sit closest to the pivot at the bottom-right corner. */
+.ra-tc-btn--boost,
+.ra-tc-btn--jump {
+  width: clamp(60px, 16vmin, 96px);
+  height: clamp(60px, 16vmin, 96px);
+}
+
+.ra-tc-btn--boost {
+  grid-area: boost;
+  border-color: rgb(233 201 104 / 62%);
+  border-radius: 24px 24px 14px 24px;
+  background: linear-gradient(145deg, rgb(114 89 49 / 85%), rgb(43 48 38 / 90%));
+  color: #fff3c7;
+}
+
+.ra-tc-btn--jump {
+  grid-area: jump;
+  border-radius: 24px 14px 24px 24px;
+  background: linear-gradient(145deg, rgb(40 86 107 / 90%), rgb(16 40 60 / 92%));
+}
+
+.ra-tc-btn--handbrake {
+  grid-area: drift;
+  width: clamp(54px, 13vmin, 78px);
+  height: clamp(54px, 13vmin, 78px);
+  align-self: end;
+  border-radius: 14px 14px 22px 22px;
+}
+
+.ra-tc-btn--minor {
+  width: clamp(46px, 11vmin, 66px);
+  height: clamp(46px, 11vmin, 66px);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgb(18 52 72 / 85%), rgb(13 34 50 / 92%));
+}
+
+.ra-tc-btn--ballcam {
+  grid-area: cam;
+  justify-self: end;
+}
+
+.ra-tc-btn--reverse {
+  grid-area: rev;
+  justify-self: start;
+}
+
+.ra-tc-btn[data-held="true"] {
+  color: #15202a;
+  border-color: #fff0b4;
+  background: linear-gradient(145deg, #ffe394, #dfaa50);
+  box-shadow:
+    0 2px 8px rgb(2 9 16 / 45%),
+    inset 0 1px 0 #fff9dc;
+  transform: translateY(2px);
+}
+
+.ra-tc-btn--ballcam[data-held="true"] {
+  color: #15202a;
+  background: linear-gradient(145deg, #bfe9ff, #6cb6d8);
+}
+
+.ra-tc-btn:focus-visible {
+  outline: 3px solid #ffe294;
+  outline-offset: 3px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Boost readout                                                              */
+/* -------------------------------------------------------------------------- */
+
+.ra-tc-boost {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: clamp(84px, 22vmin, 128px);
+  padding: 7px 9px 8px;
+  border: 1px solid rgb(153 209 213 / 46%);
+  border-radius: 14px;
+  background: rgb(11 36 52 / 85%);
+  box-shadow: 0 5px 12px rgb(1 7 13 / 34%);
+  pointer-events: none;
+}
+
+.ra-tc-boost__label {
+  font: 800 7px/1 inherit;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #b8d6d8;
+}
+
+.ra-tc-boost__value {
+  font: 800 clamp(17px, 4.4vmin, 24px) / 1 inherit;
+  letter-spacing: -0.03em;
+  color: #fff3c5;
+  font-variant-numeric: tabular-nums;
+}
+
+.ra-tc-boost__track {
+  height: 5px;
+  border-radius: 99px;
+  overflow: hidden;
+  background: rgb(255 255 255 / 10%);
+}
+
+.ra-tc-boost__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: #f3d371;
+  transition: width 90ms linear;
+}
+
+.ra-tc-boost[data-active="true"] {
+  border-color: #fff0b4;
+  box-shadow:
+    0 0 0 1px rgb(255 227 148 / 40%),
+    0 5px 12px rgb(1 7 13 / 34%);
+}
+
+.ra-tc-boost[data-empty="true"] .ra-tc-boost__fill {
+  background: #6b5a2e;
+}
+
+/* Air-context chip, so the air mapping is never a surprise. */
+.ra-tc-airchip {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  left: 50%;
+  padding: 4px 10px;
+  border: 1px solid rgb(145 201 213 / 40%);
+  border-radius: 99px;
+  background: rgb(11 36 52 / 78%);
+  font: 800 8px/1.4 inherit;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #b9d4dc;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.ra-tc-airchip[data-airborne="true"] {
+  border-color: rgb(125 255 176 / 50%);
+  color: #7dffb0;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Lobby (phone-private)                                                       */
+/* -------------------------------------------------------------------------- */
+
+.ra-tc-lobby {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  flex-direction: column;
+  gap: clamp(8px, 2vmin, 16px);
+  overflow-y: auto;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+  -webkit-overflow-scrolling: touch;
+}
+
+.ra-tc-lobby__group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ra-tc-lobby__label {
+  font: 800 8px/1 inherit;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgb(185 212 220 / 80%);
+}
+
+/* Text entry opts back into scrolling, selection and the callout menu. */
+.ra-tc-input,
+.ra-tc-input:focus {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgb(145 201 213 / 40%);
+  border-radius: 12px;
+  background: rgb(10 30 47 / 80%);
+  color: #effaff;
+  font: 600 15px/1.2 inherit;
+  outline: none;
+  touch-action: auto;
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
+.ra-tc-input:focus {
+  border-color: rgb(125 216 255 / 70%);
+  box-shadow: 0 0 0 1px rgb(125 216 255 / 30%);
+}
+
+.ra-tc-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ra-tc-chip {
+  flex: 1 1 auto;
+  min-width: 84px;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid rgb(145 201 213 / 40%);
+  border-radius: 12px;
+  background: rgb(13 40 58 / 80%);
+  color: #d8f3ff;
+  font: 800 11px/1.1 inherit;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ra-tc-chip[data-selected="true"] {
+  border-color: #fff0b4;
+  background: linear-gradient(145deg, #ffe394, #dfaa50);
+  color: #15202a;
+}
+
+.ra-tc-chip--blue[data-selected="true"] {
+  border-color: #9ad0ff;
+  background: linear-gradient(145deg, #8cc4f2, #3d7fc0);
+}
+
+.ra-tc-chip--orange[data-selected="true"] {
+  border-color: #ffc08a;
+  background: linear-gradient(145deg, #f7b27a, #d1782f);
+}
+
+.ra-tc-chip:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ra-tc-ready {
+  margin-top: auto;
+  min-height: 58px;
+  border: 1px solid #fff0b4;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #ffe394, #dfaa50);
+  color: #15202a;
+  font: 900 15px/1 inherit;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ra-tc-ready[data-ready="true"] {
+  border-color: rgb(125 255 176 / 60%);
+  background: linear-gradient(145deg, rgb(125 255 176 / 90%), rgb(58 186 122 / 90%));
+}
+
+.ra-tc-ready:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ra-tc-hint {
+  margin: 0;
+  font: 500 10px/1.5 inherit;
+  letter-spacing: 0.04em;
+  color: rgb(185 212 220 / 72%);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Orientation                                                                 */
+/* -------------------------------------------------------------------------- */
+
+/* Landscape is the strong path: two thumbs reach opposite bottom corners with
+   a short travel, and the vertical space is not the constraint. */
+@media (orientation: landscape) {
+  .ra-tc-stick {
+    width: min(40vmin, 62vh);
+  }
+
+  .ra-tc-btn--boost,
+  .ra-tc-btn--jump {
+    width: clamp(58px, 26vmin, 104px);
+    height: clamp(58px, 26vmin, 104px);
+  }
+
+  .ra-tc-btn--handbrake {
+    width: clamp(52px, 21vmin, 84px);
+    height: clamp(52px, 21vmin, 84px);
+  }
+
+  .ra-tc-btn--minor {
+    width: clamp(44px, 18vmin, 68px);
+    height: clamp(44px, 18vmin, 68px);
+  }
+}
+
+/* Portrait is the fallback, not a rotation request: the host iframe has no
+   orientation-lock permission, so the layout has to FIT whatever it is given.
+   The stick keeps the left thumb; the cluster moves under the right thumb with
+   the same primary-button priority. */
+@media (orientation: portrait) {
+  .ra-tc-gameplay {
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+
+  .ra-tc-half {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .ra-tc-half--left {
+    align-self: flex-start;
+  }
+
+  .ra-tc-half--right {
+    align-self: flex-end;
+  }
+
+  .ra-tc-stick {
+    width: min(52vmin, 30vh);
+  }
+
+  .ra-tc-cluster {
+    grid-template-areas:
+      "drift boost"
+      "drift jump"
+      "cam   rev";
+  }
+
+  .ra-tc-boost {
+    top: max(8px, env(safe-area-inset-top));
+  }
+}
+
+/* Very short landscape (a phone with the keyboard up, or a projector strip):
+   shed the secondary row rather than overflow. */
+@media (orientation: landscape) and (max-height: 380px) {
+  .ra-tc-btn__label {
+    display: none;
+  }
+
+  .ra-tc-btn--minor {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ra-tc-btn,
+  .ra-tc-boost__fill,
+  .ra-tc-stick__knob {
+    transition: none;
+  }
+}

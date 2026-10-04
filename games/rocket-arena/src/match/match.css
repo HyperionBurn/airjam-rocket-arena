@@ -1,0 +1,138 @@
+/**
+ * Match overlay styling.
+ *
+ * Scoped entirely under `.ra-` so it can be imported next to the donor's
+ * stylesheet without touching a single donor selector. The donor's own CSS
+ * (`src/donor-styles.css` and `src/donor/**`) is byte-identical and untouched;
+ * everything here is namespaced.
+ */
+
+.ra-scoreboard {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 1rem;
+  font: 700 1.25rem/1 "Lilita One", system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: rgb(0 0 0 / 45%);
+  border-radius: 0 0 0.75rem 0.75rem;
+  pointer-events: none;
+}
+
+.ra-scoreboard__team { color: #55baff; }
+.ra-scoreboard__team + .ra-scoreboard__score + .ra-scoreboard__team { color: #ffab47; }
+.ra-scoreboard__score { font-size: 1.75rem; }
+
+.ra-scoreboard__clock {
+  min-width: 3.5ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.ra-scoreboard__clock[data-overtime="true"] { color: #ffd23f; }
+
+.ra-countdown {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.ra-countdown[data-visible="false"] { visibility: hidden; }
+
+.ra-countdown__label {
+  font: 400 6rem/1 "Lilita One", system-ui, sans-serif;
+  color: #fff;
+  text-shadow: 0 0.25rem 1rem rgb(0 0 0 / 60%);
+  animation: ra-countdown-pop 0.35s ease-out;
+}
+
+@keyframes ra-countdown-pop {
+  from { transform: scale(1.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.ra-result {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2rem;
+  color: #fff;
+  background: rgb(4 10 20 / 82%);
+  font-family: system-ui, sans-serif;
+}
+
+.ra-result[hidden] { display: none; }
+
+.ra-result__winner {
+  margin: 0;
+  font: 400 3rem/1 "Lilita One", system-ui, sans-serif;
+  letter-spacing: 0.1em;
+}
+
+.ra-result__score {
+  margin: 0;
+  font: 700 2.25rem/1 system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.ra-result__mvp {
+  margin: 0 0 1rem;
+  font-size: 1.125rem;
+  color: #ffd23f;
+}
+
+.ra-result__table {
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ra-result__table th,
+.ra-result__table td {
+  padding: 0.25rem 0.6rem;
+  border-bottom: 1px solid rgb(255 255 255 / 12%);
+  text-align: right;
+}
+
+.ra-result__table thead th { color: rgb(255 255 255 / 60%); font-weight: 500; }
+.ra-result__table tbody th { text-align: left; font-weight: 500; }
+.ra-result__table tr[data-mvp="true"] th,
+.ra-result__table tr[data-mvp="true"] td { color: #ffd23f; }
+
+.ra-result__actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.ra-result__actions button {
+  padding: 0.6rem 1.4rem;
+  font: 700 1rem/1 "Lilita One", system-ui, sans-serif;
+  letter-spacing: 0.06em;
+  color: #04101f;
+  background: #fff;
+  border: 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.ra-result__actions button:hover { background: #ffd23f; }
+
+.ra-mutator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #fff;
+}

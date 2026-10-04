@@ -1,0 +1,52 @@
+/* Keep the existing navy / cyan arcade language, with clearer menu hierarchy. */
+#app .arena-play__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); left: 16%; right: 16%; top: 28%; gap: 24px; }
+#app .arena-mode { aspect-ratio: 16 / 10; }
+#app .arena-mode strong { font-size: clamp(20px, 2.2vw, 32px); font-weight: 800; font-style: italic; }
+#app .arena-mode small { font-size: clamp(12px, 1vw, 16px); line-height: 1.4; }
+#app .arena-mode > span { padding: 48px 22px 20px; }
+#app .sheet-tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: thin; }
+#app .sheet-tab { flex: 1 0 auto; }
+#app .panel-lede { line-height: 1.65; max-width: 72ch; color: #c4e3f0; }
+#app .control-device-tabs { display: flex; gap: 8px; margin: 16px 0; }
+#app .control-device-tabs button { min-height: 44px; flex: 1; padding: 10px 16px; color: #d8f3ff; background: #064272; border: 1px solid #377daa; font: 700 15px var(--rl-font); cursor: pointer; }
+#app .control-device-tabs button[aria-pressed="true"] { background: #d8f3ff; color: #06498b; border-color: #80dcff; }
+#app .parts-wrap[data-control-view="keyboard"] :is(.parts__binds--controller, thead th:nth-child(4)),
+#app .parts-wrap[data-control-view="controller"] :is(.parts__binds--keyboard, thead th:nth-child(3)),
+#app .parts__col-item { display: none; }
+#app .parts { width: 100%; min-width: 0; }
+#app .parts__desc { width: 52%; }
+#app .parts__note { line-height: 1.5; }
+#app .chip { min-height: 40px; min-width: 44px; }
+#app .chip__clear { min-height: 40px; min-width: 32px; color: #c4e3f0; background: #064272; }
+#app .parts__group th { padding-top: 24px; color: #80dcff; }
+#app .controller-choice { padding: 16px; border: 1px solid #256b98; background: #02172e80; }
+#app .match-panel__head p { max-width: 48ch; line-height: 1.5; margin-top: 10px; color: #c4e3f0; }
+#app .match-difficulty__option { position: relative; padding: 16px 10px 12px; min-height: 122px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+#app .match-difficulty__level { font: 400 12px/1.4 var(--rl-font); color: inherit; }
+#app .match-difficulty__selected { visibility: hidden; font: 700 10px/1.2 var(--rl-font); text-transform: uppercase; letter-spacing: .12em; }
+#app .match-difficulty__option[aria-pressed="true"] .match-difficulty__selected { visibility: visible; }
+#app .match-difficulty__option[aria-pressed="true"] .match-difficulty__name { color: #06498b; }
+#app .match-difficulty__help { line-height: 1.5; }
+#app .match-panel__actions { gap: 10px; }
+#app .match-panel__actions .match-action--primary { flex: 1; }
+#app .match-panel__footer { padding-top: 16px; }
+@media (max-width: 600px) {
+  #app .arena-play__grid { left: 5%; right: 5%; gap: 12px; }
+  #app .arena-mode > span { padding: 36px 12px 12px; }
+  #app .parts tbody tr:not(.parts__group) { grid-template-columns: 1fr; grid-template-areas: "action" "binding"; padding: 14px; gap: 10px; }
+  #app .parts__desc { width: auto; }
+  #app .parts__binds { grid-area: binding; }
+  #app .match-difficulty__options { gap: 6px; }
+  #app .match-difficulty__option { padding-inline: 6px; }
+  #app .match-difficulty__rank { font-size: 12px; }
+}
+@media (max-height: 570px) and (min-width: 600px) {
+  #app .arena-play__grid { left: 22%; right: 22%; top: 22%; gap: 16px; }
+}
+/* Original arcade matchup artwork and difficulty emblems. */
+#app .match-difficulty__badge { display: block; width: clamp(54px, 8vw, 80px); height: auto; aspect-ratio: 1; object-fit: contain; border-radius: 4px; }
+#app .match-opponent__artwork { position: relative; display: block; background: #02172e; overflow: hidden; border-bottom: 1px solid #256b98; }
+#app .match-opponent__artwork > img { display: block; width: 100%; height: clamp(140px, 24vh, 220px); object-fit: cover; object-position: center 45%; }
+#app .match-opponent__art-labels { position: absolute; bottom: 0; inset-inline: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 22px 16px 10px; text-align: center; color: #f5fbff; background: linear-gradient(transparent, #02172ef2); font: italic 900 19px/1.2 var(--rl-font); letter-spacing: .06em; }
+#app .match-opponent__art-labels > :nth-child(2) { font-size: 13px; color: #c4e3f0; }
+@media (max-height: 650px) { #app .match-difficulty__badge { width: 48px; } #app .match-opponent__artwork > img { height: 130px; } }

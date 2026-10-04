@@ -1,0 +1,340 @@
+/**
+ * @module useAirJamHost
+ * @description Primary hook for host/game functionality in the AirJam SDK.
+ *
+ * This hook connects your game to the AirJam server as a "host" and provides
+ * all the functionality needed to manage a multiplayer session:
+ * - Room management (create/join rooms)
+ * - Player tracking (join/leave events, player list)
+ * - Input handling (typed and behavior-aware controller input)
+ * - Signaling (send haptic feedback, toast notifications to controllers)
+ * - Runtime pause/play controls and controller state broadcasts
+ *
+ * **Standalone (default):** creates or reconnects a room from session storage / options.
+ *
+ * **Embedded child host:** when `aj_room` + `aj_cap` are present, the hook binds to that
+ * room and skips create-room; resolution is centralized in
+ * {@link ../runtime/embedded-runtime-adapters.readEmbeddedHostChildSession}.
+ */
+import { useContext } from "react";
+import type { z } from "zod";
+import { useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
+import { useAirJamContext } from "../context/air-jam-context";
+import { useAssertSessionScope } from "../context/session-scope";
+import { createAirJamDiagnosticError } from "../diagnostics";
+import type {
+  ConnectionStatus,
+  ControllerPresenceNotice,
+  ControllerStatePayload,
+  HapticSignalPayload,
+  HostControllerActionAck,
+  HostRegistrationAck,
+  PlayerProfile,
+  RoomCode,
+  RunMode,
+  RuntimeState,
+  ToastSignalPayload,
+} from "../protocol";
+import type { AirJamRealtimeClient } from "../runtime/realtime-client";
+import { hostRuntimeContext } from "../runtime/runtime-owner-contexts";
+import type { AirJamStore } from "../state/connection-store";
+
+export type JoinUrlStatus = "loading" | "ready" | "unavailable";
+
+/**
+ * Options for configuring the host runtime boundary.
+ *
+ * @example Runtime boundary usage with callbacks
+ * ```tsx
+ * <airjam.Host
+ *   onPlayerJoin={(player) => {
+ *     console.log(`${player.label} joined!`);
+ *     spawnPlayerShip(player.id);
+ *   }}
+ *   onPlayerLeave={(controllerId) => {
+ *     console.log(`Player ${controllerId} left`);
+ *     removePlayerShip(controllerId);
+ *   }}
+ * >
+ *   <HostView />
+ * </airjam.Host>
+ * ```
+ *
+ * @example With custom room ID
+ * ```tsx
+ * <airjam.Host roomId="GAME1">
+ *   <HostView />
+ * </airjam.Host>
+ * ```
+ */
+export interface AirJamHostOptions {
+  /**
+   * Room ID (4-character code) to use for this session.
+   * If not provided, a random room code will be generated.
+   * Can also be set via URL query parameter: `?room=XXXX`
+   */
+  roomId?: string;
+  /**
+   * Called when a player successfully joins the room.
+   * Use this to spawn player entities, update UI, etc.
+   */
+  onPlayerJoin?: (player: PlayerProfile) => void;
+  /**
+   * Called when a player leaves the room (disconnects or exits).
+   * Use this to remove player entities, handle cleanup.
+   */
+  onPlayerLeave?: (controllerId: string) => void;
+}
+
+/**
+ * Return type of useAirJamHost hook.
+ *
+ * Provides all the state and functions needed to run a multiplayer game session.
+ *
+ * @template TSchema - Zod schema type for input (inferred from provider)
+ */
+export interface AirJamHostApi<TSchema extends z.ZodSchema = z.ZodSchema> {
+  /** The room code for this session (e.g., "ABCD") */
+  roomId: RoomCode;
+  /** Full URL for controllers to join (display as QR code) */
+  joinUrl: string;
+  /** Whether the join URL is still being resolved, ready to render, or unavailable */
+  joinUrlStatus: JoinUrlStatus;
+  /** Current connection status to the server */
+  connectionStatus: ConnectionStatus;
+  /** List of currently connected players */
+  players: PlayerProfile[];
+  /** Full controller-session roster for the current room, including source and lease state. */
+  controllers: ControllerPresenceNotice[];
+  /** Last error message, if any */
+  lastError?: string;
+  /** Current run mode (standalone, arcade, platform) */
+  mode: RunMode;
+  /** Current runtime pause/play state */
+  runtimeState: RuntimeState;
+  /** Pause the runtime for every connected surface. */
+  pauseRuntime: () => void;
+  /** Resume the runtime for every connected surface. */
+  resumeRuntime: () => void;
+  /** Set the runtime pause/play state explicitly. */
+  setRuntimeState: (state: RuntimeState) => void;
+  /**
+   * Send state update to all connected controllers.
+   * Use for syncing game state, messages, etc.
+   */
+  sendState: (state: ControllerStatePayload) => boolean;
+  /**
+   * Send a signal (haptic feedback or toast) to controllers.
+   *
+   * @example Send haptic to specific player
+   * ```ts
+   * host.sendSignal("HAPTIC", { pattern: "heavy" }, playerId);
+   * ```
+   *
+   * @example Send toast to all players
+   * ```ts
+   * host.sendSignal("TOAST", {
+   *   title: "Round Start!",
+   *   message: "Game begins in 3 seconds",
+   * });
+   * ```
+   */
+  sendSignal: {
+    (type: "HAPTIC", payload: HapticSignalPayload, targetId?: string): void;
+    (type: "TOAST", payload: ToastSignalPayload, targetId?: string): void;
+  };
+  /** Reconnect to the server */
+  reconnect: () => void;
+  /** Remove one controller from the room immediately. */
+  removeController: (controllerId: string) => Promise<HostControllerActionAck>;
+  /** Tear down the current room and create a fresh empty room for this host. */
+  resetRoom: () => Promise<HostRegistrationAck>;
+  /** Realtime client for host events (socket-backed standalone, bridge-backed in arcade embeds) */
+  socket: AirJamRealtimeClient;
+  /**
+   * Get the latest input from a specific controller.
+   *
+   * Returns validated, typed input based on the schema provided to the session provider.
+   * Input behavior defaults are tap-safe booleans (`pulse`) and latest vectors (`latest`),
+   * with optional per-field overrides.
+   *
+   * @example In a game loop
+   * ```ts
+   * useFrame(() => {
+   *   players.forEach((player) => {
+   *     const input = host.getInput(player.id);
+   *     if (input?.action) {
+   *       fireWeapon(player.id);
+   *     }
+   *     movePlayer(player.id, input?.vector ?? { x: 0, y: 0 });
+   *   });
+   * });
+   * ```
+   */
+  getInput: (controllerId: string) => z.infer<TSchema> | undefined;
+}
+
+export interface AirJamHostState {
+  roomId: RoomCode | null;
+  connectionStatus: ConnectionStatus;
+  players: PlayerProfile[];
+  controllers: ControllerPresenceNotice[];
+  lastError?: string;
+  mode: RunMode;
+  runtimeState: RuntimeState;
+}
+
+export type AirJamHostRuntimeControls<
+  TSchema extends z.ZodSchema = z.ZodSchema,
+> = Pick<
+  AirJamHostApi<TSchema>,
+  | "roomId"
+  | "joinUrl"
+  | "joinUrlStatus"
+  | "pauseRuntime"
+  | "resumeRuntime"
+  | "setRuntimeState"
+  | "sendState"
+  | "sendSignal"
+  | "reconnect"
+  | "removeController"
+  | "resetRoom"
+  | "socket"
+  | "getInput"
+>;
+
+const toHostState = (state: AirJamStore): AirJamHostState => ({
+  roomId: state.roomId,
+  connectionStatus: state.connectionStatus,
+  players: state.players,
+  controllers: state.controllerSessions,
+  lastError: state.lastError,
+  mode: state.mode,
+  runtimeState: state.runtimeState,
+});
+
+/**
+ * Read the mounted host runtime API.
+ *
+ * Use this inside the explicit `airjam.Host` runtime boundary. Runtime ownership
+ * is mounted once at the boundary; child
+ * code reads from that runtime through this hook.
+ *
+ * This hook is runtime-aware:
+ * - standalone: creates/reconnects host rooms directly
+ * - arcade iframe runtime: auto-detects `aj_room` + `aj_cap` and bridges through the platform-owned host session
+ *
+ * This hook no longer creates host runtime side effects.
+ *
+ * **Features:**
+ * - Automatic room creation and management
+ * - Real-time player join/leave events
+ * - Typed input with validation and behavior defaults
+ * - Haptic feedback and toast notifications
+ * - Runtime state synchronization
+ *
+ * @template TSchema - Zod schema for input validation (from provider)
+ * @returns API object with state and functions
+ *
+ * @example Basic usage
+ * ```tsx
+ * const HostView = () => {
+ *   const host = useAirJamHost();
+ *
+ *   return (
+ *     <div>
+ *       <h1>Room: {host.roomId}</h1>
+ *       <QRCode value={host.joinUrl} />
+ *       <p>Players: {host.players.length}</p>
+ *       <button
+ *         onClick={
+ *           host.runtimeState === "playing"
+ *             ? host.pauseRuntime
+ *             : host.resumeRuntime
+ *         }
+ *       >
+ *         {host.runtimeState === "playing" ? "Pause" : "Resume"}
+ *       </button>
+ *     </div>
+ *   );
+ * };
+ * ```
+ *
+ * @example Reading input in a game loop
+ * ```tsx
+ * const GameScene = () => {
+ *   const host = useAirJamHost();
+ *
+ *   useFrame(() => {
+ *     host.players.forEach((player) => {
+ *       const input = host.getInput(player.id);
+ *       if (!input) return;
+ *
+ *       // Move player based on joystick
+ *       movePlayer(player.id, input.vector);
+ *
+ *       // Handle button press (tap-safe pulse default)
+ *       if (input.action) {
+ *         playerShoot(player.id);
+ *       }
+ *     });
+ *   });
+ *
+ *   return <GameCanvas />;
+ * };
+ * ```
+ *
+ * @example Sending haptic feedback
+ * ```tsx
+ * const handleHit = (playerId: string) => {
+ *   host.sendSignal("HAPTIC", { pattern: "heavy" }, playerId);
+ * };
+ * ```
+ */
+export function useAirJamHost<
+  TSchema extends z.ZodSchema = z.ZodSchema,
+>(): AirJamHostApi<TSchema>;
+export function useAirJamHost<TSelected>(
+  selector: (state: AirJamHostState) => TSelected,
+): TSelected;
+export function useAirJamHost<
+  TSchema extends z.ZodSchema = z.ZodSchema,
+  TSelected = AirJamHostApi<TSchema>,
+>(
+  selector?: (state: AirJamHostState) => TSelected,
+): AirJamHostApi<TSchema> | TSelected {
+  useAssertSessionScope("host", "useAirJamHost");
+
+  const { store } = useAirJamContext();
+  const selectedState = useStore(
+    store,
+    useShallow((state) => {
+      const hostState = toHostState(state);
+      return selector ? selector(hostState) : hostState;
+    }),
+  );
+  const runtime = useContext(
+    hostRuntimeContext,
+  ) as AirJamHostRuntimeControls<TSchema> | null;
+  if (!runtime) {
+    throw createAirJamDiagnosticError(
+      "AJ_SCOPE_MISMATCH",
+      "useAirJamHost requires a mounted host runtime boundary. Wrap the host tree with <airjam.Host> before reading host state.",
+      {
+        hookName: "useAirJamHost",
+        expectedScope: "host",
+        receivedScope: "host",
+      },
+    );
+  }
+
+  if (selector) {
+    return selectedState as TSelected;
+  }
+
+  return {
+    ...(selectedState as AirJamHostState),
+    ...runtime,
+  };
+}

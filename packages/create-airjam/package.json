@@ -1,0 +1,92 @@
+{
+  "name": "create-airjam",
+  "version": "0.9.3",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "description": "Scaffold a new Air Jam game — phone-controller multiplayer party game with a working dev server, SDK, and AI-assistant-ready docs in one command.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vucinatim/air-jam.git",
+    "directory": "packages/create-airjam"
+  },
+  "homepage": "https://github.com/vucinatim/air-jam#readme",
+  "bugs": {
+    "url": "https://github.com/vucinatim/air-jam/issues"
+  },
+  "keywords": [
+    "air-jam",
+    "airjam",
+    "airconsole",
+    "airconsole-alternative",
+    "create-airjam",
+    "cli",
+    "scaffold",
+    "template",
+    "boilerplate",
+    "starter",
+    "multiplayer",
+    "multiplayer-game",
+    "party-game",
+    "party-games",
+    "phone-controller",
+    "mobile-controller",
+    "qr-code",
+    "game",
+    "game-development",
+    "gamedev",
+    "gaming",
+    "react",
+    "typescript",
+    "vite",
+    "ai-native",
+    "vibe-coding"
+  ],
+  "bin": {
+    "create-airjam": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "scaffold-templates",
+    "scaffold-resource-budgets.json",
+    "template-version-manifest.json"
+  ],
+  "scripts": {
+    "scaffold-sources:generate": "node scripts/generate-scaffold-sources.mjs",
+    "scaffold-sources:check": "node scripts/check-scaffold-sources.mjs",
+    "templates:generate": "node scripts/generate-scaffold-sources.mjs",
+    "templates:check": "node scripts/check-scaffold-sources.mjs",
+    "build": "pnpm --filter @air-jam/cli build && pnpm templates:check && node scripts/generate-template-version-manifest.mjs --check && tsup",
+    "dev": "tsup --watch",
+    "typecheck": "pnpm --filter @air-jam/cli build && tsc --noEmit",
+    "smoke": "node scripts/smoke-test.mjs --source=tarball --template=all",
+    "smoke:registry": "node scripts/smoke-test.mjs --source=registry --template=all",
+    "smoke:tarball": "node scripts/smoke-test.mjs --source=tarball --template=all",
+    "smoke:workspace": "node scripts/smoke-test.mjs --source=workspace --template=all",
+    "test": "pnpm build && node --test runtime/*.test.mjs && tsx --test runtime/*.test.ts",
+    "prepublishOnly": "node scripts/prepublish.js && pnpm build",
+    "prepack": "node ../../scripts/release/prepare-public-package-manifest.mjs",
+    "postpack": "node ../../scripts/release/restore-public-package-manifest.mjs"
+  },
+  "dependencies": {
+    "@air-jam/cli": "workspace:^",
+    "commander": "^14.0.0",
+    "fs-extra": "^11.3.0",
+    "json5": "^2.2.3",
+    "kleur": "^4.1.5",
+    "prompts": "^2.4.2",
+    "yauzl": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/prompts": "^2.4.9",
+    "@types/yauzl": "^2.10.3",
+    "@types/yazl": "^2.4.5",
+    "yazl": "^3.3.1",
+    "tsup": "^8.5.1",
+    "tsx": "^4.20.6",
+    "typescript": "~5.9.3"
+  }
+}

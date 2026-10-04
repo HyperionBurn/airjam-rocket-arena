@@ -1,0 +1,66 @@
+#!/usr/bin/env node
+
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const packageRoot = path.resolve(__dirname, "..");
+const repoPackageJsonPath = path.resolve(packageRoot, "../../package.json");
+const createAirJamPackageJsonPath = path.resolve(packageRoot, "package.json");
+const cliPackageJsonPath = path.resolve(packageRoot, "../cli/package.json");
+const sdkPackageJsonPath = path.resolve(packageRoot, "../sdk/package.json");
+const serverPackageJsonPath = path.resolve(
+  packageRoot,
+  "../server/package.json",
+);
+const mcpServerPackageJsonPath = path.resolve(
+  packageRoot,
+  "../mcp-server/package.json",
+);
+const manifestPath = path.join(packageRoot, "template-version-manifest.json");
+
+const readPackageVersion = (filePath) => {
+  const packageJson = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  if (!packageJson.version) {
+    throw new Error(`Missing version in ${filePath}`);
+  }
+  return packageJson.version;
+};
+
+const readPackageManager = (filePath) => {
+  const packageJson = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  if (!/^pnpm@\d+\.\d+\.\d+$/u.test(packageJson.packageManager ?? "")) {
+    throw new Error(`Missing canonical pnpm packageManager in ${filePath}`);
+  }
+  return packageJson.packageManager;
+};
+
+const manifest = {
+  packageManager: readPackageManager(repoPackageJsonPath),
+  packages: {
+    "create-airjam": readPackageVersion(createAirJamPackageJsonPath),
+    "@air-jam/cli": readPackageVersion(cliPackageJsonPath),
+    "@air-jam/sdk": readPackageVersion(sdkPackageJsonPath),
+    "@air-jam/server": readPackageVersion(serverPackageJsonPath),
+    "@air-jam/mcp-server": readPackageVersion(mcpServerPackageJsonPath),
+  },
+};
+
+const serializedManifest = `${JSON.stringify(manifest, null, 2)}\n`;
+if (process.argv.includes("--check")) {
+  if (
+    !fs.existsSync(manifestPath) ||
+    fs.readFileSync(manifestPath, "utf8") !== serializedManifest
+  ) {
+    throw new Error(
+      `Template version manifest is stale; run node scripts/generate-template-version-manifest.mjs`,
+    );
+  }
+  console.log(`✓ Template version manifest is current at ${manifestPath}`);
+} else {
+  fs.writeFileSync(manifestPath, serializedManifest, "utf-8");
+  console.log(`✓ Wrote template version manifest to ${manifestPath}`);
+}

@@ -1,0 +1,73 @@
+<!doctype html>
+<!--
+  DEV-ONLY test harness (served by `airjam dev` at /harness.html; not part of the
+  production build, which only has index.html as an entry).
+
+  Why it exists: browsers throttle timers and stop requestAnimationFrame in
+  background tabs, so a projector tab plus several phone tabs cannot be driven
+  from one automated browser. Putting the host and the controllers in iframes of
+  ONE visible tab keeps all of them running.
+
+  Usage:  /harness.html?players=2&drive=circle
+    players  number of phone iframes (1-6, default 2)
+    matchSeconds  dev override for regulation length
+    cars     comma list of garage car ids, one per phone (e.g. fennec,spectre,vesper)
+    drive    optional scripted input for every phone: fwd | circle | boost
+             (see ControllerSurface; dev builds only)
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Rocket Arena harness</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #111; color: #cfe6ff; font: 12px ui-monospace, monospace; }
+      #host { display: block; width: 100vw; height: 74vh; border: 0; }
+      #phones { display: flex; gap: 6px; height: calc(26vh - 22px); padding: 4px 6px; overflow: hidden; }
+      .phone { flex: 1 1 0; min-width: 0; border: 1px solid #345; border-radius: 6px; }
+      #bar { height: 14px; padding: 0 6px; }
+    </style>
+  </head>
+  <body>
+    <iframe id="host" allow="autoplay; gamepad; fullscreen"></iframe>
+    <div id="bar">room: <b id="room">…</b></div>
+    <div id="phones"></div>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const count = Math.max(1, Math.min(6, Number(params.get("players") ?? 2)));
+      const drive = params.get("drive");
+      const host = document.getElementById("host");
+      const hostQuery = new URLSearchParams({ debug: "1" });
+      if (params.get("matchSeconds")) hostQuery.set("matchSeconds", params.get("matchSeconds"));
+      host.src = `/?${hostQuery}`;
+      const phones = document.getElementById("phones");
+      let launched = false;
+
+      const findRoom = () => {
+        try {
+          const text = host.contentDocument?.body?.innerText ?? "";
+          return text.match(/ROOM CODE\s+([A-Z0-9]{4})/)?.[1] ?? null;
+        } catch {
+          return null;
+        }
+      };
+
+      const timer = setInterval(() => {
+        const room = findRoom();
+        if (!room || launched) return;
+        launched = true;
+        clearInterval(timer);
+        document.getElementById("room").textContent = room;
+        for (let i = 1; i <= count; i += 1) {
+          const frame = document.createElement("iframe");
+          frame.className = "phone";
+          const query = new URLSearchParams({ room, controllerId: `pad-${i}` });
+          if (drive) query.set("drive", drive);
+          const cars = (params.get("cars") ?? "").split(",").filter(Boolean);
+          if (cars[i - 1]) query.set("car", cars[i - 1]);
+          frame.src = `/controller?${query}`;
+          phones.append(frame);
+        }
+      }, 400);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="theme-color" content="#061a37" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Rocket Arena</title>
+  </head>
+  <body>
+    <!--
+      Donor stage. The donor's `app/startup.js` looks up `#app` at module scope
+      and builds its own `#loading` block when it is missing, so the block below
+      is the donor's markup copied verbatim from its index.html. Rendering it
+      statically here shows the real loading screen from first paint instead of
+      waiting for the donor module graph. It sits outside `#root` because React
+      clears its own mount container on first render.
+    -->
+    <div id="app">
+      <div id="loading" data-state="loading" style="--load-progress: 0%">
+        <div class="load__panel">
+          <img
+            class="load__mark"
+            src="/assets/ui/rocket-arena-mark.webp"
+            width="1254"
+            height="1254"
+            alt=""
+          />
+          <h1 class="load__title">ROCKET <span>ARENA</span></h1>
+          <p class="load__tagline">Drive hard. Fly high. Own the field.</p>
+          <div class="load__progress-block">
+            <div class="load__status-row">
+              <p class="load__label" role="status" aria-live="polite">Loading game code</p>
+            </div>
+            <div class="load__rule" role="progressbar" aria-label="Game loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span class="load__bar"></span>
+              <output class="load__percent">0%</output>
+            </div>
+            <p class="load__note">Preparing the game modules.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- React shell: owns the status readout and the fatal error panel only. -->
+    <div id="root"></div>
+    <script type="module" src="./src/main.tsx"></script>
+  </body>
+</html>

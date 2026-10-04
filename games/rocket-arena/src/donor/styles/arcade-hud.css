@@ -1,0 +1,121 @@
+/* HUD layout uses the supplied component artwork. Match data remains native game state. */
+#app .boost.arcade-boost {
+  position: fixed; min-width: 0; padding: 0; border: 0; border-radius: 0;
+  background: transparent; box-shadow: none; pointer-events: none;
+  z-index: 30; transform: none; filter: none; animation: none;
+}
+.arcade-boost__number {
+  position: absolute; display: grid; place-items: center; font-variant-numeric: tabular-nums;
+}
+.arcade-boost.is-empty .arcade-boost__number { color: #c3cbd3; }
+#app .match-scoreboard {
+  top: max(0px, env(safe-area-inset-top)); left: 50%;
+  border-radius: 0; color: white; box-shadow: none;
+}
+#app .match-scoreboard__name { display: none; }
+#app .ball-cam-indicator {
+  position: fixed; margin: 0; padding: 0; border: 0; border-radius: 0;
+  box-shadow: none; text-shadow: none; gap: 0;
+}
+/* Esc opens the pause menu on desktop; gameplay has no garage/play/tool button row. */
+#app #car-button, #app #match-button, #app .hud-tools,
+#app #settings-button, #app #fullscreen-button, #app .cursor-hint { display: none; }
+/* Touch still needs a reachable pause button; preserve every driving control. */
+body.touch-controls-enabled #app .hud-tools,
+#app[data-input-method="touch"] .hud-tools {
+  display: flex; top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right)); gap: 0;
+}
+body.touch-controls-enabled #app #settings-button,
+#app[data-input-method="touch"] #settings-button {
+  display: grid; place-items: center; width: 44px; height: 44px;
+  padding: 0; border: 0; border-radius: 2px; background: #14213090;
+  box-shadow: none; transform: none; transition: none;
+}
+#app #settings-button > svg { display: none; }
+#app #settings-button::before {
+  content: ""; width: 15px; height: 18px;
+  border-left: 5px solid #f4f5f7; border-right: 5px solid #f4f5f7;
+  box-sizing: border-box;
+}
+#app #settings-button:focus-visible { outline: 2px solid #f8d38a; outline-offset: 2px; }
+/* Approved HUD component artwork. Decorations are baked WebP textures, not live paths. */
+#app .boost.arcade-boost {
+  width: clamp(118px, 14vw, 220px); height: auto; aspect-ratio: 234 / 240;
+  right: max(1.55vw, env(safe-area-inset-right)); bottom: max(5.2vh, env(safe-area-inset-bottom));
+}
+.arcade-boost__dial, .arcade-boost__fill {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  background: url('/assets/ui/hud/boost-dial.webp') center / contain no-repeat;
+}
+.arcade-boost__fill {
+  background-image: url('/assets/ui/hud/boost-fuel.webp');
+  --boost-sweep: 0deg;
+  mask-image: conic-gradient(from 180deg at 50.8547% 52.0833%, #000 0deg var(--boost-sweep), transparent var(--boost-sweep) 360deg);
+  -webkit-mask-image: conic-gradient(from 180deg at 50.8547% 52.0833%, #000 0deg var(--boost-sweep), transparent var(--boost-sweep) 360deg);
+}
+.arcade-boost__number {
+  inset: 42% 9% auto; height: 25%; color: #ffd459;
+  font-family: 'Arial Narrow', 'Liberation Sans Narrow', sans-serif; font-weight: 400;
+  font-size: clamp(36px, 4.5vw, 68px); line-height: 1; letter-spacing: -.045em;
+  text-shadow: 0 1px #9b420a; transform: rotate(2deg);
+}
+.arcade-boost.is-firing .arcade-boost__number { color: #fff5b0; }
+#app .match-scoreboard {
+  display: block; width: clamp(255px, 21.83vw, 365px); height: auto; aspect-ratio: 365 / 120;
+  padding: 0; border: 0; background: url('/assets/ui/hud/scoreboard.webp') center / contain no-repeat;
+}
+#app .match-scoreboard[hidden] { display: none; }
+#app .match-scoreboard__team, #app .match-scoreboard__clock {
+  position: absolute; inset: 0; padding: 0; background: none; border: 0; box-shadow: none;
+}
+#app .match-scoreboard__score {
+  position: absolute; top: 19%; width: 20%; text-align: center;
+  font: 400 clamp(27px, 2.55vw, 42px)/1 'Arial Narrow', 'Liberation Sans Narrow', sans-serif;
+  letter-spacing: -.045em; color: white;
+}
+#app .match-scoreboard__team--orange .match-scoreboard__score { left: 3.2%; transform: rotate(-5deg); }
+#app .match-scoreboard__team--blue .match-scoreboard__score { right: 4%; transform: rotate(5deg); }
+#app .match-scoreboard__time {
+  position: absolute; top: 18%; left: 25%; width: 50%; text-align: center;
+  font: 400 clamp(23px, 2.1vw, 35px)/1 'Arial Narrow', 'Liberation Sans Narrow', sans-serif;
+  color: #f5f9fc; font-variant-numeric: tabular-nums; letter-spacing: .035em;
+}
+#app .match-scoreboard__period {
+  display: block; position: absolute; top: 73%; left: 24%; width: 52%;
+  text-align: center; color: #14191c; font: 600 clamp(10px, 1.08vw, 17px)/1 Arial, sans-serif;
+  letter-spacing: .035em;
+}
+#app .ball-cam-indicator {
+  display: block; width: clamp(166px, 14.47vw, 242px); height: auto; aspect-ratio: 242 / 44;
+  left: max(2.63vw, env(safe-area-inset-left)); bottom: max(8.5vh, env(safe-area-inset-bottom));
+  background: url('/assets/ui/hud/ball-cam.webp') center / contain no-repeat;
+  color: transparent; font-size: 0; overflow: visible;
+}
+#app .ball-cam-indicator[hidden] { display: none; }
+#app .ball-cam-indicator::before { display: none; }
+#app .ball-cam-indicator::after {
+  content: attr(data-hint); position: absolute; top: 100%; left: 10%;
+  font: 500 clamp(10px, 1vw, 15px)/1.4 Arial, sans-serif;
+  letter-spacing: .045em; color: #dedede; white-space: nowrap;
+}
+body.touch-controls-enabled #app .boost.arcade-boost,
+#app[data-input-method="touch"] .boost.arcade-boost {
+  top: calc(max(10px, env(safe-area-inset-top)) + 54px); bottom: auto;
+  right: max(12px, env(safe-area-inset-right)); width: 90px; height: auto;
+}
+body.touch-controls-enabled .arcade-boost__number,
+#app[data-input-method="touch"] .arcade-boost__number { font-size: 28px; }
+body.touch-controls-enabled #app .ball-cam-indicator,
+#app[data-input-method="touch"] .ball-cam-indicator {
+  bottom: calc(max(12px, env(safe-area-inset-bottom)) + clamp(120px, 30vmin, 180px) + 8px);
+  width: 145px;
+}
+@media (max-height: 500px) {
+  #app .match-scoreboard { width: 235px; }
+  #app .match-scoreboard__score { font-size: 27px; }
+  #app .match-scoreboard__time { font-size: 23px; }
+  #app .match-scoreboard__period { font-size: 10px; }
+  #app .boost.arcade-boost { width: 110px; }
+  .arcade-boost__number { font-size: 34px; }
+}

@@ -1,0 +1,20 @@
+/*
+ * Donor stylesheet set, reproduced verbatim from the donor's own index.html.
+ *
+ * The donor's `index.html` loads `src/styles.css` and then <link>s eight more
+ * sheets after it. Vite has no HTML entry for the donor, so the same set and
+ * the same order are declared here. Nothing in this file is edited donor CSS:
+ * it only re-orders what `import "./donor-styles.css"` would have pulled in.
+ *
+ * Import this AFTER `./index.css` so donor rules keep the final say, exactly as
+ * they do in the donor's own document.
+ */
+@import "./donor/styles.css";
+@import "./donor/styles/arcade-hud.css";
+@import "./donor/styles/home.css";
+@import "./donor/styles/goal-presentation.css";
+@import "./donor/styles/pause-menu.css";
+@import "./donor/styles/ui-system.css";
+@import "./donor/styles/menu-refinements.css";
+@import "./donor/styles/mobile-touch.css";
+@import "./donor/styles/online.css";

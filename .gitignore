@@ -1,0 +1,52 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+.bundle-analyze
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local package artifacts and disposable validation copies
+.airjam/
+!packages/cli/template-assets/managed/.airjam/
+!packages/cli/template-assets/managed/.airjam/ai-pack.json
+backups/
+
+# Atomic readiness-manifest writer state
+scripts/repo/programs/*.json.lock
+scripts/repo/programs/*.json.tmp-*
+
+# Generated hosted AI pack artifacts
+apps/platform/public/ai-pack/
+
+# Playwright smoke artifacts
+test-results/
+playwright-report/
+apps/platform/.next-smoke/
+
+# TypeScript incremental build artifacts
+*.tsbuildinfo
+.vercel
+
+# Per-article cross-post artifacts (generated dev.to markdown, working media).
+# The canonical post.mdx, post.meta.ts, and devto.config.ts ARE tracked.
+content/blog/*/dev-to.md
+content/blog/*/media/

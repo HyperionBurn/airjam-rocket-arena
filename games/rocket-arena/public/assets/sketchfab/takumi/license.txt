@@ -1,0 +1,11 @@
+Model Information:
+* title:	Rocket League Takumi Body
+* source:	https://sketchfab.com/3d-models/rocket-league-takumi-body-b3da35481ceb4e3e8a120ce9bd91d537
+* author:	Blender Editor (https://sketchfab.com/blender.editer)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Rocket League Takumi Body" (https://sketchfab.com/3d-models/rocket-league-takumi-body-b3da35481ceb4e3e8a120ce9bd91d537) by Blender Editor (https://sketchfab.com/blender.editer) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

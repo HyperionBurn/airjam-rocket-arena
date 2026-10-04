@@ -1,0 +1,1 @@
+Artwork rasterized from the user-supplied `refrance for ui/rocket-league-hud` component. Regenerate using `node tools/prepare-reference-hud.mjs`. Runtime score, time, boost and input hints remain live DOM text.

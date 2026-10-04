@@ -1,0 +1,67 @@
+/* Online-only overlays; no changes to lighting, postprocessing, or presets. */
+#app .arena-play__grid { left:12%;right:12%;top:21%;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;max-width:880px;margin:auto; }
+#app .arena-mode { aspect-ratio:2.05; }
+#app .arena-home .arena-play__actions { bottom:25px; }
+#app .online-panel[hidden], #app .online-panel [hidden], #app .online-hud[hidden] { display:none!important; }
+#app .online-panel { position:fixed;inset:0;z-index:160;display:flex;align-items:center;justify-content:center;background:#061321ed;overflow:auto;padding:22px;opacity:1;visibility:visible;pointer-events:auto;color:#eaf9ff; }
+#app .online-dialog { width:min(100%,920px);max-height:calc(100dvh - 44px);overflow:auto;background:#0b253e;border:1px solid #326484;border-radius:12px;padding:28px;font:400 16px/1.5 Archivo,Arial,sans-serif;box-shadow:0 24px 80px #0008; }
+#app .online-heading { display:flex;align-items:center;justify-content:space-between;gap:15px; }
+#app .online-eyebrow { margin:0;color:#90cfe9;font-size:11px;letter-spacing:.16em; }
+#app .online-dialog h1 { margin:4px 0;font:italic 800 34px/1.1 Archivo,Arial,sans-serif;color:#fff; }
+#app .online-subtitle { color:#bfd9eb;margin:14px 0 22px; }
+#app .online-dialog button, #app .online-hud button { border:1px solid #477f9d;background:#103653;color:#f4fbff;border-radius:5px;padding:11px 15px;font:700 12px/1.3 Archivo,Arial,sans-serif;cursor:pointer;min-height:43px;letter-spacing:.02em; }
+#app .online-dialog button:hover, #app .online-hud button:hover { background:#155273; }
+#app .online-dialog button:focus-visible, #app .online-dialog input:focus-visible, #app .online-dialog a:focus-visible { outline:3px solid #93e8ff;outline-offset:3px; }
+#app .online-dialog button:active { transform:translateY(2px); }
+#app .online-dialog button:disabled { cursor:not-allowed;opacity:.5; }
+#app .online-dialog .online-close { font-size:26px;padding:0;width:42px; }
+#app .online-playlists { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px; }
+#app .online-dialog .online-playlist { padding:0 0 12px;overflow:hidden;background:#092039;text-align:center;border:2px solid #33516c; }
+#app .online-playlist img { display:block;width:100%;aspect-ratio:1.6;object-fit:cover; }
+#app .online-playlist strong { display:block;font-size:28px;line-height:1.2;margin-top:3px; }
+#app .online-playlist small { display:block;color:#a9cde1;font-size:10px;letter-spacing:.16em;margin-top:4px; }
+#app .online-dialog .online-playlist[aria-pressed="true"] { border-color:#7de9ff;background:#174a6a; }
+#app .online-account-row { display:flex;align-items:end;gap:22px;margin-top:20px; }
+#app .online-name { display:grid;gap:6px;width:min(300px,100%);color:#95bed4;font-size:11px;letter-spacing:.09em; }
+#app .online-name input { width:100%;padding:12px;border:1px solid #4a7999;border-radius:5px;background:#04182a;color:#fff;font:16px Archivo,Arial,sans-serif;box-sizing:border-box;user-select:text; }
+#app .online-identity { color:#9abed3;font-size:13px;padding-bottom:10px; }
+#app .online-status { background:#061b2d;border-left:3px solid #62d8f7;padding:12px 16px;color:#d2edfa;font-size:14px;margin:22px 0;min-height:46px;box-sizing:border-box; }
+#app .online-actions { display:flex;gap:10px;flex-wrap:wrap; }
+#app .online-dialog .online-primary { background:#55cce9;border-color:#88e8ff;color:#052139; }
+#app .online-account-help { color:#8dafc5;font-size:12px;margin:18px 0 0; }
+#app .online-account-help a { color:#b1e7ff;text-decoration:underline; }
+#app .online-progress { display:flex;align-items:center;gap:12px;padding:8px 0; }
+#app .online-progress img { width:62px;height:62px; }
+#app .online-results { text-align:center;padding:10px; }
+#app .online-results h2 { font-size:38px;margin:0;color:#fff; }
+#app .online-results p { color:#cae8f7; }
+#app .online-results img { width:105px;height:105px; }
+#app.online-active .match-scoreboard,#app.online-active .match-message,#app.online-active .match-tab,#app.online-active .arcade-home-button { display:none!important; }
+#app .online-hud { position:fixed;inset:0;z-index:30;pointer-events:none;color:white;font:600 13px Archivo,Arial,sans-serif; }
+#app .online-score { position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;align-items:center;background:#05162de8;border:1px solid #527188;border-radius:5px;overflow:hidden; }
+#app .online-score b { font-size:34px;min-width:65px;text-align:center;padding:5px 10px;background:#0976b7; }
+#app .online-score b:last-child { background:#bc5e23; }
+#app .online-score [data-clock] { min-width:100px;font-size:25px;text-align:center;padding:6px; }
+#app .online-banner { position:absolute;top:112px;left:50%;transform:translateX(-50%);font:900 30px Archivo,Arial,sans-serif;text-shadow:0 2px 5px #00101e;margin:0;text-align:center; }
+#app .online-roster { position:absolute;top:78px;left:50%;transform:translateX(-50%);display:flex;gap:8px;max-width:95vw;flex-wrap:wrap;justify-content:center; }
+#app .online-roster span { background:#032039d9;padding:4px 9px;border-radius:4px;font-size:11px; }
+#app .online-roster .blue-team { border-bottom:2px solid #40beff; }
+#app .online-roster .orange-team { border-bottom:2px solid #ffae63; }
+#app .online-network { position:absolute;left:14px;bottom:12px;background:#031729d9;padding:7px 10px;border-radius:4px;max-width:50vw;font-size:11px; }
+#app .online-hud button { position:absolute;right:16px;top:155px;bottom:auto;pointer-events:auto;min-height:34px;font-size:10px;padding:8px;background:#081b30dc; }
+#app .online-hud [data-forfeit] { top:110px;bottom:auto; }
+@media(max-height:620px) { #app .arena-play__grid { top:17%;left:15%;right:15%;gap:10px;max-width:760px; } #app .arena-mode { aspect-ratio:2.4; } #app .online-dialog { padding:18px; } #app .online-playlist img { max-height:135px; } }
+@media(max-width:640px) { #app .arena-play__grid { left:5%;right:5%;top:23%; } #app .arena-mode { aspect-ratio:1.25; } #app .arena-mode strong { font-size:18px; } #app .arena-mode small { line-height:1.4; } #app .online-panel { padding:10px; } #app .online-dialog { padding:18px;max-height:calc(100dvh - 20px); } #app .online-playlists { gap:8px; } #app .online-playlist strong { font-size:23px; } #app .online-playlist img { aspect-ratio:1.15; } #app .online-account-row { display:block; } #app .online-identity { padding-top:10px; } #app .online-dialog h1 { font-size:28px; } #app .online-actions button { flex:1 1 130px; } #app .online-roster { top:70px; } }
+@media(prefers-reduced-motion:reduce) { #app .online-dialog button { transition:none; } }
+
+#app .online-private-options { display:flex;flex-wrap:wrap;align-items:end;gap:10px;margin:0 0 18px;padding:16px 0;border-block:1px solid #326484; }
+#app .online-private-options .online-name { flex:1 1 160px;max-width:250px; }
+#app [name="inviteCode"],#app [data-invite-code] { font-family:monospace;letter-spacing:.14em;text-transform:uppercase; }
+#app .online-private-lobby { padding:16px;border:1px solid #477f9d;border-radius:8px;margin:16px 0; }
+#app .online-invite { display:flex;align-items:center;flex-wrap:wrap;gap:12px; }
+#app .online-invite > span { color:#a9cde1;font-size:11px; }
+#app [data-invite-code] { font-size:28px;user-select:all;color:#93e8ff; }
+#app .online-private-roster { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:18px 0; }
+#app .online-private-roster p { margin:0;padding:10px;background:#061b2d;border-left:3px solid #40beff;overflow-wrap:anywhere;font-size:13px; }
+#app .online-private-roster .orange-team { border-color:#ffae63; }
+@media(max-width:640px) { #app .online-private-options button { flex:1 1 140px; } #app .online-private-roster { grid-template-columns:1fr; } #app [data-invite-code] { font-size:24px; } }

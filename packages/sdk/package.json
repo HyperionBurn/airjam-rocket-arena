@@ -1,0 +1,259 @@
+{
+  "name": "@air-jam/sdk",
+  "version": "0.9.3",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "description": "SDK for building Air Jam games — phone-controller multiplayer party games with React, host-authoritative state sync, and QR-code joining.",
+  "private": false,
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vucinatim/air-jam.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://github.com/vucinatim/air-jam#readme",
+  "bugs": {
+    "url": "https://github.com/vucinatim/air-jam/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "air-jam",
+    "airjam",
+    "airconsole",
+    "airconsole-alternative",
+    "multiplayer",
+    "multiplayer-game",
+    "party-game",
+    "party-games",
+    "phone-controller",
+    "mobile-controller",
+    "qr-code",
+    "gyroscope",
+    "sdk",
+    "react",
+    "typescript",
+    "zustand",
+    "zod",
+    "game",
+    "game-development",
+    "gamedev",
+    "gaming",
+    "websocket",
+    "socket.io",
+    "real-time",
+    "ai-native",
+    "vibe-coding"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./ui": {
+      "types": "./dist/ui.d.ts",
+      "import": "./dist/ui.js",
+      "require": "./dist/ui.cjs"
+    },
+    "./arcade": {
+      "types": "./dist/arcade.d.ts",
+      "import": "./dist/arcade.js",
+      "require": "./dist/arcade.cjs"
+    },
+    "./arcade/bridge": {
+      "types": "./dist/arcade/bridge.d.ts",
+      "import": "./dist/arcade/bridge.js",
+      "require": "./dist/arcade/bridge.cjs"
+    },
+    "./arcade/bridge/controller": {
+      "types": "./dist/arcade/bridge/controller.d.ts",
+      "import": "./dist/arcade/bridge/controller.js",
+      "require": "./dist/arcade/bridge/controller.cjs"
+    },
+    "./arcade/bridge/host": {
+      "types": "./dist/arcade/bridge/host.d.ts",
+      "import": "./dist/arcade/bridge/host.js",
+      "require": "./dist/arcade/bridge/host.cjs"
+    },
+    "./arcade/bridge/iframe": {
+      "types": "./dist/arcade/bridge/iframe.d.ts",
+      "import": "./dist/arcade/bridge/iframe.js",
+      "require": "./dist/arcade/bridge/iframe.cjs"
+    },
+    "./arcade/host": {
+      "types": "./dist/arcade/host.d.ts",
+      "import": "./dist/arcade/host.js",
+      "require": "./dist/arcade/host.cjs"
+    },
+    "./arcade/runtime": {
+      "types": "./dist/arcade/runtime.d.ts",
+      "import": "./dist/arcade/runtime.js",
+      "require": "./dist/arcade/runtime.cjs"
+    },
+    "./arcade/surface": {
+      "types": "./dist/arcade/surface.d.ts",
+      "import": "./dist/arcade/surface.js",
+      "require": "./dist/arcade/surface.cjs"
+    },
+    "./arcade/url": {
+      "types": "./dist/arcade/url.d.ts",
+      "import": "./dist/arcade/url.js",
+      "require": "./dist/arcade/url.cjs"
+    },
+    "./protocol": {
+      "types": "./dist/protocol.d.ts",
+      "import": "./dist/protocol.js",
+      "require": "./dist/protocol.cjs"
+    },
+    "./metadata": {
+      "types": "./dist/metadata.d.ts",
+      "import": "./dist/metadata.js",
+      "require": "./dist/metadata.cjs"
+    },
+    "./prefabs": {
+      "types": "./dist/prefabs.d.ts",
+      "import": "./dist/prefabs.js",
+      "require": "./dist/prefabs.cjs"
+    },
+    "./preview": {
+      "types": "./dist/preview.d.ts",
+      "import": "./dist/preview.js",
+      "require": "./dist/preview.cjs"
+    },
+    "./release": {
+      "types": "./dist/release.d.ts",
+      "import": "./dist/release.js",
+      "require": "./dist/release.cjs"
+    },
+    "./platform-machine": {
+      "types": "./dist/platform-machine.d.ts",
+      "import": "./dist/platform-machine.js",
+      "require": "./dist/platform-machine.cjs"
+    },
+    "./agent-tooling": {
+      "types": "./dist/agent-tooling.d.ts",
+      "import": "./dist/agent-tooling.js",
+      "require": "./dist/agent-tooling.cjs"
+    },
+    "./runtime-topology": {
+      "types": "./dist/runtime-topology.d.ts",
+      "import": "./dist/runtime-topology.js",
+      "require": "./dist/runtime-topology.cjs"
+    },
+    "./runtime-inspection": {
+      "types": "./dist/runtime-inspection.d.ts",
+      "import": "./dist/runtime-inspection.js",
+      "require": "./dist/runtime-inspection.cjs"
+    },
+    "./styles.css": "./src/styles.css"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "typesVersions": {
+    "*": {
+      "ui": [
+        "dist/ui.d.ts"
+      ],
+      "arcade": [
+        "dist/arcade.d.ts"
+      ],
+      "arcade/bridge": [
+        "dist/arcade/bridge.d.ts"
+      ],
+      "arcade/bridge/controller": [
+        "dist/arcade/bridge/controller.d.ts"
+      ],
+      "arcade/bridge/host": [
+        "dist/arcade/bridge/host.d.ts"
+      ],
+      "arcade/bridge/iframe": [
+        "dist/arcade/bridge/iframe.d.ts"
+      ],
+      "arcade/host": [
+        "dist/arcade/host.d.ts"
+      ],
+      "arcade/runtime": [
+        "dist/arcade/runtime.d.ts"
+      ],
+      "arcade/surface": [
+        "dist/arcade/surface.d.ts"
+      ],
+      "arcade/url": [
+        "dist/arcade/url.d.ts"
+      ],
+      "protocol": [
+        "dist/protocol.d.ts"
+      ],
+      "metadata": [
+        "dist/metadata.d.ts"
+      ],
+      "prefabs": [
+        "dist/prefabs.d.ts"
+      ],
+      "release": [
+        "dist/release.d.ts"
+      ],
+      "platform-machine": [
+        "dist/platform-machine.d.ts"
+      ],
+      "agent-tooling": [
+        "dist/agent-tooling.d.ts"
+      ],
+      "runtime-topology": [
+        "dist/runtime-topology.d.ts"
+      ],
+      "runtime-inspection": [
+        "dist/runtime-inspection.d.ts"
+      ],
+      "preview": [
+        "dist/preview.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "typecheck": "tsc --noEmit && tsc -p tests/tsconfig.json --noEmit",
+    "dev": "tsup --watch --no-clean"
+  },
+  "dependencies": {
+    "@radix-ui/react-slider": "^1.3.6",
+    "@radix-ui/react-slot": "^1.2.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "howler": "^2.2.4",
+    "lucide-react": "^0.554.0",
+    "nanoid": "^5.1.16",
+    "qrcode": "^1.5.4",
+    "socket.io-client": "^4.8.3",
+    "tailwind-merge": "^2.5.5",
+    "zod": "^4.2.1",
+    "zustand": "^5.0.3"
+  },
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@types/howler": "^2.2.12",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "jsdom": "^29.0.1",
+    "tailwindcss": "^4.1.17",
+    "tsup": "^8.5.1",
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.4"
+  }
+}

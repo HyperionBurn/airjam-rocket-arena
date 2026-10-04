@@ -1,0 +1,467 @@
+@media (prefers-reduced-motion: reduce) {
+  .theme-option {
+    transition: none;
+  }
+}
+.car-tab {
+  position: fixed;
+  left: max(24px, var(--safe-left));
+  bottom: max(26px, var(--safe-bottom));
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 170px;
+  height: 72px;
+  padding: 10px 16px 10px 12px;
+  border: 3px solid var(--outline);
+  border-radius: 8px;
+  box-shadow:
+    0 5px 0 var(--outline),
+    inset 0 3px 0 var(--mark-highlight);
+  background: var(--mark);
+  color: var(--outline);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease;
+}
+.car-tab:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 0 var(--outline),
+    inset 0 3px 0 var(--mark-highlight);
+}
+.car-tab:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 2px 0 var(--outline),
+    inset 0 3px 0 var(--mark-highlight);
+}
+.car-tab__icon {
+  display: grid;
+  place-items: center;
+  transform: rotate(-7deg);
+}
+.car-tab__copy {
+  display: grid;
+  gap: 2px;
+}
+.car-tab__label {
+  font: 25px/1 var(--display);
+  text-transform: uppercase;
+}
+.car-tab__ride {
+  font: 800 10px/1.4 var(--sans);
+}
+.car-overlay[hidden] {
+  display: none !important;
+}
+.car-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  padding: max(24px, var(--safe-top)) max(24px, var(--safe-right))
+    max(24px, var(--safe-bottom)) max(24px, var(--safe-left));
+  background: color-mix(in srgb, var(--outline) 84%, transparent);
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.car-overlay.is-open {
+  opacity: 1;
+}
+.car-overlay.is-committing {
+  opacity: 0;
+  transition-duration: 0.3s;
+}
+.car-dialog {
+  position: relative;
+  width: min(1020px, 100%);
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 3px solid var(--outline);
+  border-radius: 10px;
+  box-shadow:
+    0 10px 0 var(--outline),
+    inset 0 3px 0 var(--blue-highlight);
+  background: var(--ink-1);
+  color: var(--graphite);
+  transform: translateY(14px) scale(0.98);
+  transition: transform 0.21s cubic-bezier(0.2, 0.8, 0.2, 1);
+  scrollbar-color: var(--blue-highlight) var(--ink-1);
+  scrollbar-width: thin;
+}
+.car-overlay.is-open .car-dialog {
+  transform: translateY(0) scale(1);
+}
+.car-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 25px 27px 19px;
+}
+.car-dialog__head h2 {
+  margin: 0;
+  font: 48px/1 var(--display);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-shadow: 0 3px 0 var(--outline);
+}
+.car-dialog__subtitle {
+  margin: 6px 0 0;
+  font: 700 14px/1.4 var(--sans);
+  color: var(--graphite-2);
+}
+.car-dialog .sheet-head__close {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+}
+.car-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 17px;
+  padding: 9px 27px 23px;
+}
+.car-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 3px solid var(--outline);
+  border-radius: 10px;
+  box-shadow: 0 5px 0 var(--outline);
+  background: var(--ink-2);
+  color: var(--graphite);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+.car-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 0 var(--outline);
+}
+.car-card:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 var(--outline);
+}
+.car-card.is-selected {
+  border-color: var(--mark);
+}
+.car-card__stage {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1.43;
+  overflow: hidden;
+  background: var(--blue-stage);
+}
+.car-card__stage:before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 75%;
+  height: 160%;
+  background: var(--blue-stage-light);
+  transform: rotate(34deg);
+}
+.car-card__stage:after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 12%;
+  right: 12%;
+  bottom: 12%;
+  height: 16%;
+  border: 2px solid var(--blue-highlight);
+  border-radius: 50%;
+  background: var(--ink-2);
+  box-shadow: 0 5px 0 var(--ink-1);
+}
+.car-card__canvas {
+  display: block;
+  width: 113%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+}
+.car-card__equipped {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  right: 10px;
+  display: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--outline);
+  border-radius: 8px;
+  box-shadow: 0 2px 0 var(--outline);
+  background: var(--mark);
+  color: var(--outline);
+}
+.car-card.is-selected .car-card__equipped {
+  display: grid;
+}
+.car-card__status {
+  position: absolute;
+  z-index: 3;
+  padding: 9px 12px;
+  border: 2px solid var(--outline);
+  border-radius: 8px;
+  background: var(--ink-1);
+  color: var(--graphite);
+  font: 800 12px/1.25 var(--sans);
+}
+.car-card__status.is-missing {
+  color: var(--mark-text);
+}
+.car-card.is-unavailable .car-card__canvas {
+  opacity: 0.45;
+}
+.car-card__body {
+  display: grid;
+  gap: 13px;
+  padding: 16px;
+  border-top: 3px solid var(--outline);
+  box-shadow: inset 0 2px 0 var(--blue-highlight);
+}
+.car-card__name {
+  font: 27px/1.12 var(--display);
+  text-shadow: 0 2px 0 var(--outline);
+}
+.car-card__action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 2px solid var(--outline);
+  border-radius: 8px;
+  box-shadow:
+    0 3px 0 var(--outline),
+    inset 0 2px 0 var(--blue-highlight);
+  background: var(--ink-3);
+  font: 18px/1 var(--display);
+  text-transform: uppercase;
+}
+.car-card.is-selected .car-card__action {
+  box-shadow:
+    0 3px 0 var(--outline),
+    inset 0 2px 0 var(--mark-highlight);
+  background: var(--mark);
+  color: var(--outline);
+}
+.car-card.is-selected .car-card__action > svg {
+  visibility: hidden;
+}
+.car-dialog__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0 28px 22px;
+  font: 700 11px/1.5 var(--sans);
+  color: var(--graphite-2);
+}
+.car-dialog__foot > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.car-dialog__keys kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 23px;
+  padding: 0 5px;
+  border: 1px solid var(--blue-highlight);
+  border-radius: 4px;
+  background: var(--ink-0);
+  font: 800 10px/1 var(--sans);
+}
+.car-tab:focus-visible,
+.car-dialog :focus-visible,
+body.pad-nav .car-dialog :focus,
+body.pad-nav .car-tab:focus {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+.android-app .car-grid[hidden],
+.android-app .car-ad-panel[hidden] {
+  display: none;
+}
+.android-app .car-ad-panel {
+  padding: 12px 28px 28px;
+}
+.android-app .car-ad-panel h3 {
+  margin: 0 0 12px;
+  font: 30px/1.15 var(--display);
+}
+.android-app .car-ad-panel p {
+  max-width: 64ch;
+  color: var(--graphite-2);
+  font: 600 14px/1.65 var(--sans);
+}
+.android-app .car-ad-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+.android-app .car-ad-actions button,
+.android-app .car-ad-footer button {
+  min-height: 44px;
+  padding: 11px 16px;
+  border: 2px solid var(--outline);
+  border-radius: 8px;
+  box-shadow:
+    0 3px 0 var(--outline),
+    inset 0 2px 0 var(--blue-highlight);
+  background: var(--ink-2);
+  color: var(--graphite);
+  font: 800 13px/1.3 var(--sans);
+  cursor: pointer;
+}
+.android-app .car-ad-actions [data-car-watch] {
+  background: var(--mark);
+  color: var(--outline);
+  box-shadow:
+    0 3px 0 var(--outline),
+    inset 0 2px 0 var(--mark-highlight);
+}
+.android-app .car-ad-actions button:disabled,
+.android-app .car-ad-footer button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.android-app .car-ad-actions button:not(:disabled):active,
+.android-app .car-ad-footer button:not(:disabled):active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--outline);
+}
+.android-app .car-ad-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 0 28px 24px;
+}
+.android-app .car-ad-status {
+  flex: 1 1 200px;
+  color: var(--graphite-2);
+  font: 700 12px/1.5 var(--sans);
+}
+.android-app .car-ad-status:empty {
+  display: none;
+}
+.android-app .car-ad-footer button {
+  flex: none;
+}
+.android-app .car-dialog__keys {
+  display: none;
+}
+.android-app .car-dialog:has(.car-ad-panel:not([hidden])) .car-dialog__foot {
+  display: none;
+}
+body.touch-controls-enabled .car-dialog__keys {
+  display: none;
+}
+@media (max-width: 767px) {
+  .car-overlay {
+    padding: max(12px, var(--safe-top)) max(12px, var(--safe-right))
+      max(16px, var(--safe-bottom)) max(12px, var(--safe-left));
+  }
+  .car-dialog__head {
+    padding: 19px 18px 14px;
+  }
+  .car-dialog__head h2 {
+    font-size: 38px;
+  }
+  .car-grid {
+    gap: 10px;
+    padding: 8px 17px 19px;
+  }
+  .car-card__body {
+    gap: 10px;
+    padding: 11px;
+  }
+  .car-card__name {
+    font-size: 22px;
+  }
+  .car-card__action {
+    padding: 8px;
+    font-size: 15px;
+  }
+  .car-dialog__foot {
+    padding: 0 19px 18px;
+  }
+  .car-dialog__keys {
+    display: none !important;
+  }
+}
+@media (max-width: 539px) {
+  .car-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .car-card {
+    grid-template-columns: 45% 1fr;
+    grid-template-rows: 1fr;
+    min-height: 130px;
+  }
+  .car-card__stage {
+    aspect-ratio: auto;
+    min-height: 130px;
+  }
+  .car-card__canvas {
+    width: 147%;
+    max-width: none;
+  }
+  .car-card__body {
+    align-content: center;
+    padding: 12px;
+    border-top: 0;
+    border-left: 3px solid var(--outline);
+    box-shadow: inset 2px 0 0 var(--blue-highlight);
+  }
+  .car-card__name {
+    font-size: 23px;
+  }
+  .car-card__equipped {
+    top: 7px;
+    right: 7px;
+    width: 25px;
+    height: 25px;
+  }
+  .car-card__status {
+    max-width: 90%;
+    padding: 7px;
+    font-size: 10px;
+  }
+  .android-app .car-ad-panel {
+    padding: 8px 18px 22px;
+  }
+  .android-app .car-ad-panel h3 {
+    font-size: 26px;
+  }
+  .android-app .car-ad-footer {
+    padding: 0 18px 20px;
+  }
+}

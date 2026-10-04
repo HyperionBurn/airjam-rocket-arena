@@ -1,0 +1,9 @@
+#app .arena-pause { position: fixed; inset: 0; z-index: 130; display: grid; place-items: center; background: #02172e4d; font-family: var(--rl-font,Arial), sans-serif; touch-action: none; }
+#app .arena-pause[hidden] { display: none; }
+.arena-pause__menu { width: min(380px, calc(100vw - 48px)); }
+#app .arena-pause h2 { margin: 0 0 18px; color: #f1faff; text-align: left; padding-left: 22px; font: italic 900 36px/1 var(--rl-font,Arial), sans-serif; letter-spacing: .02em; text-shadow: 0 2px 3px #02172e; text-transform: uppercase; }
+.arena-pause nav { display: flex; flex-direction: column; gap: 6px; }
+#app .arena-pause button { min-height: 56px; padding: 14px 26px; color: white; background: #03284a; border: 0; border-radius: 0; box-shadow: none; text-align: left; cursor: pointer; font: italic 900 22px/1.15 var(--rl-font,Arial), sans-serif; letter-spacing: .02em; text-transform: uppercase; clip-path: polygon(4% 0,100% 0,96% 100%,0 100%); }
+#app .arena-pause button:first-child { color: #06498b; background: #d8f3ff; }
+#app .arena-pause button:is(:hover,:focus-visible) { color: #06498b; background: #80dcff; outline: none; }
+@media (max-height: 420px) { #app .arena-pause h2 { font-size: 25px; margin-bottom: 10px; } #app .arena-pause button { min-height: 39px; padding: 9px 20px; font-size: 18px; } }

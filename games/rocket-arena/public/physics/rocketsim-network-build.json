@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "checkpointVersion": 1,
+  "revision": "c2baacb8f4b441dd8505e63c2aeb5a1679b60b02",
+  "emscripten": "4.0.10",
+  "wasmSha256": "6d92e76f35d6cd7e5df76fede54f690bdb6f0394f48cb81f3bc742871bec1992",
+  "loaderSha256": "4c4346e67aece5db48cafce63005f43a683c3e4d390f58a9c7ddb0957bc81a83",
+  "bridgeSha256": "e67a6967c366065e7345753a0e0adb4b0420e53f74e61bb6c37cd07a8b1151d8",
+  "extensionSha256": "d9a274563362799ad76ae9f68e95523451428a62dbbf75311b19cd7a10f1a877",
+  "vendorDigest": "d41b5a815537971c4ab04dc3aac950a7866a695b18e77f99f331b90fd4e0f37c",
+  "baseline": "4d3b9c9f2c2227bc72d292fb5f294ab1f435e34b8ac8300527ee9d833a829405",
+  "scope": "Exposed Soccar gameplay checkpoint; not Bullet solver/manifold serialization. Offline core unchanged."
+}

@@ -1,0 +1,17 @@
+{
+  "id": "rocket-arena",
+  "name": "Rocket Arena",
+  "description": "3D rocket-car football ported from the Rocket Arena donor. A thin React shell boots the donor runtime unchanged under Vite.",
+  "category": "showcase",
+  "scaffold": false,
+  "export": {
+    "exclude": [
+      ".airjam",
+      "dist",
+      "dist-ssr",
+      "node_modules",
+      "coverage",
+      "tsconfig.tsbuildinfo"
+    ]
+  }
+}

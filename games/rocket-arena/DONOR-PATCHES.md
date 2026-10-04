@@ -18,6 +18,7 @@ leave the donor's own single-player behaviour unchanged when not embedded.**
 | `src/donor/app/arena-bridge.js` | Tiny rendezvous between `startup.js` and the React shell. `embedded` (set by the shell **before** boot) and `controller` (published by `startup.js`). No DOM, no sim. |
 | `src/donor/app/local-multiplayer.js` | The local N-car match controller: roster setup, the per-frame driver, per-player cameras, split-screen rendering, goal/replay bookkeeping, audio for N cars, HUD data. |
 | `src/donor/app/tile-viewports.js` | Pure split-screen tiling (1-6 views, gap-free). Separate so it is unit-tested without Three.js. |
+| `src/donor/audio/arena-sfx.js` | Match-event sounds the donor never had: kickoff tick and "go", goal blast + horn + crowd, demolition, boost pad pickup, full-time buzzer. Synthesised with Web Audio (no assets), through one limiter into the donor's own mixer. |
 | `src/donor/app/fov.js` | Pure FOV compensation for narrow split-screen tiles (partial, capped at 112 degrees). |
 
 ## Edited files
@@ -29,7 +30,8 @@ leave the donor's own single-player behaviour unchanged when not embedded.**
 | | `localMulti?.afterReset()` at the end of `_e` (the donor's kickoff reset). | `_e` is reached from several places (match start, kickoff after a goal, replay finish). The local match must reset its per-match state (camera solvers, replay clock, last toucher) however it was reached. |
 | | `if (localMulti?.active) return localMulti.frame(W);` first line of `wt` (the frame function). | While a local match runs, the controller drives the frame; otherwise the donor runs exactly as before. |
 | | Builds `makeViewPost` + `createLocalMultiplayer({...})` and `arenaBridge.attach(...)`. Passes the donor's own sim, world, session, clock, renderer, audio objects and `_e`. | The wiring. |
-| | `if (arenaBridge.embedded) { an.classList.add("airjam-embedded") } else { home.show(); online.restoreIntent(); }` | In Air Jam the lobby is the projector's, not the donor's home screen. Not embedded = the donor behaves as upstream. |
+| `src/donor/app/local-multiplayer.js` | Calls `ArenaSfx` on goals, demolitions, countdown ticks, kickoff, full time and nearby pad pickups. | The sounds belong to the match events this controller already detects. |
+| `src/donor/app/startup.js` (cont.) | `if (arenaBridge.embedded) { an.classList.add("airjam-embedded") } else { home.show(); online.restoreIntent(); }` | In Air Jam the lobby is the projector's, not the donor's home screen. Not embedded = the donor behaves as upstream. |
 | `src/donor/rendering/fennec-v2-post.js` | `if (this.sizeOverride) this.size.set(...) else getDrawingBufferSize(...)` | Each split-screen view needs its own post chain sized to its rectangle. The class sized its targets from the whole drawing buffer. |
 | `src/donor/rendering/reference-post.js` | Same `sizeOverride`. | Same. |
 | `src/donor/rendering/world.js` | (1) `GameWorld.update` and `updateBoostVisuals` read an optional `controlsByCar` so every car's jets, flip flames and wheel spin follow its own input. (2) `cloneWithOwnPaint`: each car gets its own paint materials (textures shared, not cloned). | (1) The donor passed one control set for "car 0" and one for "everyone else". (2) Cars cloned from one model shared materials, and team paint is written into material uniforms, so two cars of the same model on different teams ended up the same colour. |

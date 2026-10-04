@@ -50,9 +50,15 @@ export interface StickShaping {
   expo: number;
 }
 
+/**
+ * The PHONE already shapes its stick once (`src/controller/stick.ts`: deadzone
+ * 0.06, expo 1.2). This host-side pass is only a guard against drift and bad
+ * values, so it is nearly transparent: stacking a second full deadzone and curve
+ * here is what used to make half a stick push steer almost nothing.
+ */
 export const DEFAULT_STICK_SHAPING: StickShaping = Object.freeze({
-  deadzone: 0.08,
-  expo: 1.35,
+  deadzone: 0.02,
+  expo: 1,
 });
 
 /** Coerce anything into a finite number, else 0. The bridge's NaN guard, done properly. */

@@ -197,6 +197,21 @@ const ambientIsHidden = (): boolean =>
 const ambientNow = (): number =>
   typeof performance !== "undefined" ? performance.now() : Date.now();
 
+/**
+ * Rocket League drives with a trigger for throttle and a stick for steering. One
+ * thumb stick has to do both, so on the ground the throttle axis is boosted: a
+ * diagonal push (steering while accelerating) must still be full throttle, or
+ * every corner would bleed speed. Boosting also drives the car forward, as it
+ * does in the game, so a thumb on BOOST plus a steering flick is enough.
+ */
+const GROUND_THROTTLE_GAIN = 1.6;
+/** Boosting drives forward unless the stick is clearly pulled back (a brake). */
+const BOOST_DRIVES_ABOVE = -0.5;
+/** Steering reaches full lock a little before the stick is fully pushed. */
+const GROUND_STEER_GAIN = 1.15;
+
+const unit = (value: number): number => (value < -1 ? -1 : value > 1 ? 1 : value);
+
 /** Shape a payload into level controls for the given ground/air context. */
 const mapToControls = (
   input: RocketArenaInput,
@@ -207,9 +222,11 @@ const mapToControls = (
   const stick = shapeStick(input.stick, shaping);
   // The air-roll affordance, exactly as `touch.js:215` composes it.
   const airRollHeld = input.handbrake || input.airRoll;
+  let throttle = onGround ? unit(stick.y * GROUND_THROTTLE_GAIN) : stick.y;
+  if (onGround && input.boost && stick.y > BOOST_DRIVES_ABOVE) throttle = 1;
   return sanitizeControls({
-    throttle: stick.y,
-    steer: stick.x,
+    throttle,
+    steer: onGround ? unit(stick.x * GROUND_STEER_GAIN) : stick.x,
     // Pitch is the stick's Y with the donor's sign flip (`touch.js:212`), and is
     // ground-suppressed because it is meaningless there.
     pitch: onGround ? 0 : -stick.y,

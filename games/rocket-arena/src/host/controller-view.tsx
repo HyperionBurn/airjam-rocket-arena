@@ -102,8 +102,9 @@ export const ControllerSurface = () => {
    * The physics is 120 Hz and the host reads once per donor frame, so 60 Hz is
    * ample while keeping socket traffic sane on a crowded event network.
    */
-  useControllerTick(
-    useCallback(() => {
+  const lastSentAt = useRef(0);
+  const publish = useCallback(() => {
+      lastSentAt.current = performance.now();
       const handle = handleRef.current;
       if (!handle) return;
       const intents = handle.read();
@@ -119,9 +120,18 @@ export const ControllerSurface = () => {
         ballCamPresses: intents.ballCamPressCount,
         lobby: lobbyRef.current,
       });
-    }, [writeInput]),
-    { intervalMs: 16 },
-  );
+    }, [writeInput]);
+  useControllerTick(publish, { intervalMs: 16 });
+
+  /**
+   * A touch change goes out NOW instead of waiting for the next 16 ms timer tick
+   * (up to a frame of latency on every steer, boost or jump). Capped so a thumb
+   * dragging at display rate cannot flood the socket: at most one extra send per
+   * 6 ms, on top of the steady tick.
+   */
+  const publishOnTouch = useCallback(() => {
+    if (performance.now() - lastSentAt.current >= 6) publish();
+  }, [publish]);
 
   return (
     <>
@@ -129,6 +139,7 @@ export const ControllerSurface = () => {
         controllerRef={handleRef}
         phase={isPlaying ? "playing" : "lobby"}
         controlsDisabled={connectionStatus !== "connected"}
+        onIntents={publishOnTouch}
         // Unknown until the host's first readout; the touch layer treats null as grounded.
         airborne={mine ? mine.airborne : null}
         boostPercent={mine?.boost ?? 0}

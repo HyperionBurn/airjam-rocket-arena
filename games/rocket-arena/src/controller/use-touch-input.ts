@@ -62,7 +62,7 @@ import { offsetFromOrigin, shapeStick } from "./stick";
  * Fraction of the stick pad's width the knob is allowed to travel. The pad is
  * deliberately larger than the travel so a thumb never feels like it hit a wall.
  */
-const STICK_TRAVEL_FRACTION = 0.36;
+const STICK_TRAVEL_FRACTION = 0.5;
 
 /** Knob diameter as a fraction of the pad, for the visual. */
 const STICK_KNOB_FRACTION = 0.46;
@@ -201,7 +201,14 @@ export const useTouchInput = ({
   /* ---------------------------------------------------------------------- */
 
   /** Origin of the stick, measured at press time so a rotation is handled. */
-  const originRef = useRef<{ x: number; y: number; radius: number } | null>(null);
+  const originRef = useRef<{
+    x: number;
+    y: number;
+    radius: number;
+    /** Where the knob is drawn at rest, relative to the pad centre (CSS px). */
+    knobX: number;
+    knobY: number;
+  } | null>(null);
   const stickPointerRef = useRef<number | null>(null);
 
   const resetKnob = useCallback(() => {
@@ -250,8 +257,10 @@ export const useTouchInput = ({
 
       const knob = knobRef.current;
       if (knob) {
-        const dx = shaped.x * origin.radius;
-        const dy = -shaped.y * origin.radius;
+        // The knob is drawn from where the thumb landed, so what the thumb feels
+        // (its own travel) and what the knob shows stay the same thing.
+        const dx = origin.knobX + shaped.x * origin.radius;
+        const dy = origin.knobY - shaped.y * origin.radius;
         knob.style.transform = `translate(-50%, -50%) translate(${dx}px, ${dy}px)`;
       }
     },
@@ -271,11 +280,13 @@ export const useTouchInput = ({
         const rect = pad.getBoundingClientRect();
         if (rect.width <= 0) return;
 
-        originRef.current = {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2,
-          radius: (rect.width * STICK_TRAVEL_FRACTION) / 2,
-        };
+        // FLOATING stick: neutral is wherever the thumb lands, not the printed
+        // centre. A fixed centre has no feel under a thumb, so a landing a few
+        // millimetres off meant constant steering and a car that wandered.
+        const radius = (rect.width * STICK_TRAVEL_FRACTION) / 2;
+        const knobX = event.clientX - (rect.left + rect.width / 2);
+        const knobY = event.clientY - (rect.top + rect.height / 2);
+        originRef.current = { x: event.clientX, y: event.clientY, radius, knobX, knobY };
         stickPointerRef.current = event.pointerId;
         pad.setPointerCapture(event.pointerId);
 

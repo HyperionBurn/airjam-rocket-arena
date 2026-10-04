@@ -17,15 +17,21 @@
  * Nothing here knows about the car, the room, or React.
  */
 
-/** Fraction of the pad radius ignored as thumb rest / slop. */
-export const STICK_DEADZONE = 0.12;
+/**
+ * Fraction of the pad radius ignored as thumb rest / slop. This is the ONLY
+ * place the stick is shaped (the host passes the value through): shaping it
+ * again on the host stacked a second deadzone and a second curve on top, so half
+ * a stick push reached the car as a few percent of steering.
+ */
+export const STICK_DEADZONE = 0.06;
 
 /**
  * Curve exponent applied to the post-deadzone magnitude. 1 is linear; higher
- * values shrink the first half of the travel. 1.9 keeps fine steering usable
- * at speed while still demanding a real push for a hard turn.
+ * values shrink the first half of the travel. A light 1.2 keeps small
+ * corrections precise without making the car feel numb: a gamepad's stick is
+ * close to linear and so is Rocket League's steering.
  */
-export const STICK_EXPO = 1.9;
+export const STICK_EXPO = 1.2;
 
 export interface StickShapeOptions {
   readonly deadzone?: number;

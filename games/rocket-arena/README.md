@@ -61,6 +61,26 @@ screen, bot fill on.
   buzz on ball touches (light/medium), goals (heavy for the scorer, success/failure for
   the rest), demolitions, "go" and the final whistle.
 
+## How it drives
+
+* **Floating stick:** the left thumb's neutral point is wherever it lands, so a
+  slightly-off touch no longer steers the car on its own.
+* **One shaping pass:** the phone applies a small deadzone and a light curve; the host
+  passes it through. (It used to be shaped twice, which made half a stick push steer
+  almost nothing.)
+* **Rocket League mapping on the ground:** steering reaches full lock a little before
+  the stick does, a diagonal push is full throttle, and **BOOST drives the car
+  forward** by itself (pull the stick clearly back to brake).
+* **Touches are sent immediately** (rate-capped) instead of waiting for the next
+  16 ms timer tick.
+* **Match sounds:** kickoff ticks and "go", goal blast + horn + crowd, demolitions,
+  boost pad pickups and a full-time buzzer, on top of the donor's engine, boost,
+  jump and impact audio.
+* **Latency:** play on the local network (`airjam dev`, phones on the same Wi-Fi) for
+  real feel. Through the hosted server a steer takes about 90 ms longer to reach the
+  car (measured against the Render deployment), which is the main reason the hosted
+  version feels laggier.
+
 ## Controls (phone)
 
 Left thumb: stick (drive / steer; pitch + yaw in the air). Right thumb: **BOOST**,

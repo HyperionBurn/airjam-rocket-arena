@@ -75,6 +75,16 @@ vi.mock("../../donor/effects/ball-locator.js", () => ({
 }));
 vi.mock("../../donor/audio/engine.js", () => ({ EngineAudio: class { update() {} } }));
 vi.mock("../../donor/audio/vehicle.js", () => ({ VehicleAudio: class { update() {} } }));
+vi.mock("../../donor/audio/arena-sfx.js", () => ({
+  ArenaSfx: class {
+    tick() {}
+    go() {}
+    goal() {}
+    demolish() {}
+    pickup() {}
+    finalWhistle() {}
+  },
+}));
 
 // eslint-disable-next-line import/first
 import { createLocalMultiplayer, DEFAULT_TUNING } from "../../donor/app/local-multiplayer.js";

@@ -40,6 +40,7 @@ import { SpeedLines } from "../effects/speed-lines.js";
 import { BallLocator } from "../effects/ball-locator.js";
 import { EngineAudio } from "../audio/engine.js";
 import { VehicleAudio } from "../audio/vehicle.js";
+import { ArenaSfx } from "../audio/arena-sfx.js";
 import { CAR_STATE, CAR_STATE_STRIDE, STATE_LAYOUT, ro } from "../physics/state-layout.js";
 import { resolveVisualHitboxFamily } from "../physics/presets.js";
 import { tileViewports } from "./tile-viewports.js";
@@ -93,6 +94,7 @@ const neutralControlSet = () => ({
 });
 
 export function createLocalMultiplayer(ctx) {
+  const sfx = new ArenaSfx();
   const st = {
     active: false,
     starting: false,
@@ -123,6 +125,7 @@ export function createLocalMultiplayer(ctx) {
     botDriver: null,
     kickoffTicks: 0,
     kickoffCount: 0,
+    prevCountdown: 0,
     tuning: { ...DEFAULT_TUNING },
     prevPhase: null,
     listeners: new Set(),
@@ -315,6 +318,7 @@ export function createLocalMultiplayer(ctx) {
           if (ctx.world.cars[view.car].position.distanceToSquared(padPoint) < 1200 * 1200) nearby = true;
         }
         ctx.arenaEffects.pickup(padPoint, pad.isBig, nearby);
+        if (nearby) sfx.pickup(pad.isBig);
       }
       st.padHistory[i] = active;
     }
@@ -543,12 +547,23 @@ export function createLocalMultiplayer(ctx) {
     const phase = session.state.phase;
     if (phase !== st.prevPhase) {
       emit({ type: "phase", phase, countdown: session.state.countdown, winner: session.state.winner });
+      // Match-event sounds: "go" as the ball drops, the buzzer at full time.
+      if (st.prevPhase === "kickoff" && phase === "playing") sfx.go();
+      if (phase === "ended") sfx.finalWhistle();
+      if (phase !== "kickoff") st.prevCountdown = 0;
       st.prevPhase = phase;
+    }
+    if (phase === "kickoff" && session.state.countdown !== st.prevCountdown) {
+      st.prevCountdown = session.state.countdown;
+      if (session.state.countdown > 0) sfx.tick();
     }
     const state = clock.currState;
     for (let i = 0; i < st.count; i++) {
       const demolished = state[STATE_LAYOUT.CARS + i * CAR_STATE_STRIDE + CAR_STATE.DEMOED] === 1;
-      if (demolished && !st.demoPrev[i]) emit({ type: "demolished", car: i });
+      if (demolished && !st.demoPrev[i]) {
+        emit({ type: "demolished", car: i });
+        sfx.demolish();
+      }
       st.demoPrev[i] = demolished;
     }
   };
@@ -613,6 +628,7 @@ export function createLocalMultiplayer(ctx) {
       ctx.motionEffects.clear();
       world.controlsByCar = null;
       emit({ type: "goal", team: goal.team, scorer: goal.scorerIndex });
+      sfx.goal();
       ctx.goalPresentation.begin({
         time: st.replayClock,
         state: clock.currState,

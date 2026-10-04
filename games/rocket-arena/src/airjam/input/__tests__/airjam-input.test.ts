@@ -96,11 +96,16 @@ describe("stick shaping", () => {
     expect(Object.keys(shaped).sort()).toEqual(["x", "y"]);
   });
 
-  it("applies the donor-verified deadzone as a rescale, not a subtract", () => {
-    // 0.08 is the donor's own tA (touch.js:5); 0.08 must be exactly zero,
-    // including on the negative side (no -0 leaking into the ABI).
-    expect(shapeAxis(0.08)).toBe(0);
-    expect(shapeAxis(-0.08)).toBe(0);
+  it("applies a small deadzone as a rescale, not a subtract", () => {
+    // The phone shapes the stick once (deadzone 0.06); the host only guards
+    // against drift, so its deadzone is tiny. Inside it the value is exactly
+    // zero, including on the negative side (no -0 leaking into the ABI).
+    expect(shapeAxis(0.02)).toBe(0);
+    expect(shapeAxis(-0.02)).toBe(0);
+    // It must not eat real input: a 10% push still steers.
+    expect(shapeAxis(0.1)).toBeGreaterThan(0.07);
+    // Linear: the host never adds a second curve.
+    expect(shapeAxis(0.5)).toBeCloseTo((0.5 - 0.02) / 0.98, 5);
     // Full travel survives deadzone + expo unchanged.
     expect(shapeAxis(1)).toBe(1);
     expect(shapeAxis(-1)).toBe(-1);
@@ -207,6 +212,51 @@ describe("pulse -> level: held controls", () => {
       ...(ROCKET_ARENA_INPUT_BEHAVIOR.latest ?? []),
     ];
     expect(new Set(all).size).toBe(all.length);
+  });
+});
+
+describe("Rocket League driving feel", () => {
+  const driveWith = (stick: { x: number; y: number }, extra: Record<string, unknown> = {}, onGround = true) => {
+    const h = harness();
+    h.source.updateCarState({ onGround });
+    h.publish({ stick, jump: false, ...extra });
+    return h.source.read();
+  };
+
+  it("steering is responsive: half a stick push is about half a steer, not a few percent", () => {
+    const steer = driveWith({ x: 0.5, y: 0 }).steer;
+    expect(steer).toBeGreaterThan(0.45);
+    expect(steer).toBeLessThan(0.75);
+  });
+
+  it("reaches full steering lock a little before the stick is fully pushed", () => {
+    expect(driveWith({ x: 0.9, y: 0 }).steer).toBe(1);
+  });
+
+  it("a diagonal push (steer while accelerating) is full throttle", () => {
+    const controls = driveWith({ x: 0.7, y: 0.7 });
+    expect(controls.throttle).toBe(1);
+    expect(controls.steer).toBeGreaterThan(0.7);
+  });
+
+  it("boost drives the car forward even with the stick centred", () => {
+    expect(driveWith({ x: 0, y: 0 }, { boost: true }).throttle).toBe(1);
+    expect(driveWith({ x: 0.4, y: 0 }, { boost: true }).throttle).toBe(1);
+  });
+
+  it("a hard pull back still brakes while boosting", () => {
+    expect(driveWith({ x: 0, y: -0.9 }, { boost: true }).throttle).toBeLessThan(0);
+  });
+
+  it("boost does not force throttle in the air, where the stick is pitch", () => {
+    const controls = driveWith({ x: 0, y: 0 }, { boost: true }, false);
+    expect(controls.throttle).toBe(0);
+  });
+
+  it("an idle stick sends no throttle or steering", () => {
+    const controls = driveWith({ x: 0, y: 0 });
+    expect(controls.throttle).toBe(0);
+    expect(controls.steer).toBe(0);
   });
 });
 

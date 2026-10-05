@@ -60,7 +60,9 @@
 
 .ra-hud__cam {
   position: absolute;
-  top: 14px;
+  /* below the scoreboard's height: at 14px the shared top-centre scoreboard covered
+     this label on the tiles next to the middle of the screen */
+  top: 76px;
   right: 14px;
   padding: 3px 9px;
   border-radius: 6px;

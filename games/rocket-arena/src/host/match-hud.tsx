@@ -95,15 +95,44 @@ const BoostGauge = ({ boost, boosting }: { boost: number; boosting: boolean }) =
   );
 };
 
+const plateScale = (mark: LocalMatchHudMark): number => Math.max(0.55, Math.min(1.15, 1.35 - mark.distance / 5200));
+
+/**
+ * Stack nameplates that would cover each other (cars lined up one behind the other, e.g.
+ * at kickoff): the nearest car keeps its spot, farther plates move up until they are free.
+ * Returns the vertical offset (px, negative = up) per mark, in the given order.
+ */
+const declutter = (marks: ReadonlyArray<LocalMatchHudMark>, nameOf: (car: number) => string): number[] => {
+  const boxes = marks.map((mark, i) => {
+    const scale = plateScale(mark);
+    return { i, mark, w: (nameOf(mark.car).length * 7.2 + 26) * scale, h: 20 * scale };
+  });
+  const placed: { x0: number; x1: number; y0: number; y1: number }[] = [];
+  const offsets = new Array<number>(marks.length).fill(0);
+  for (const box of [...boxes].sort((a, b) => a.mark.distance - b.mark.distance)) {
+    const x0 = box.mark.x - box.w / 2, x1 = box.mark.x + box.w / 2;
+    let dy = 0;
+    for (let tries = 0; tries < 6; tries += 1) {
+      const y1 = box.mark.y + dy, y0 = y1 - box.h;
+      const hit = placed.find((p) => x0 < p.x1 && x1 > p.x0 && y0 < p.y1 && y1 > p.y0);
+      if (!hit) break;
+      dy = hit.y0 - box.mark.y - 2;
+    }
+    offsets[box.i] = dy;
+    placed.push({ x0, x1, y0: box.mark.y + dy - box.h, y1: box.mark.y + dy });
+  }
+  return offsets;
+};
+
 /** A floating nameplate over another car, scaled down with distance. */
-const Nameplate = ({ mark, name, ownTeam }: { mark: LocalMatchHudMark; name: string; ownTeam: number }) => {
-  const scale = Math.max(0.55, Math.min(1.15, 1.35 - mark.distance / 5200));
+const Nameplate = ({ mark, name, ownTeam, lift = 0 }: { mark: LocalMatchHudMark; name: string; ownTeam: number; lift?: number }) => {
+  const scale = plateScale(mark);
   return (
     <div
       className="ra-plate"
       data-team={mark.team}
       data-friend={mark.team === ownTeam}
-      style={{ left: mark.x, top: mark.y, transform: `translate(-50%, -100%) scale(${scale})` }}
+      style={{ left: mark.x, top: mark.y + lift, transform: `translate(-50%, -100%) scale(${scale})` }}
     >
       <span className="ra-plate__dot" />
       {name}
@@ -145,16 +174,20 @@ export const MatchHud = ({ hud, seats, replay = false }: MatchHudProps) => {
         <Tile key={view.index} view={view} name={seats[view.car]?.name ?? `Player ${view.car + 1}`} />
       ))}
       {!replay
-        ? hud.views.flatMap((view) =>
-            (view.marks ?? []).map((mark) => (
+        ? hud.views.flatMap((view) => {
+            const marks = view.marks ?? [];
+            const nameOf = (car: number): string => seats[car]?.name ?? `Player ${car + 1}`;
+            const lifts = declutter(marks, nameOf);
+            return marks.map((mark, i) => (
               <Nameplate
                 key={`${view.index}-${mark.car}`}
                 mark={mark}
                 ownTeam={view.team}
-                name={seats[mark.car]?.name ?? `Player ${mark.car + 1}`}
+                name={nameOf(mark.car)}
+                lift={lifts[i]}
               />
-            )),
-          )
+            ));
+          })
         : null}
 
       <div className="ra-hud__score">

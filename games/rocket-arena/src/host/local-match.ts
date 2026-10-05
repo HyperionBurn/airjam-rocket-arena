@@ -129,6 +129,8 @@ export interface LocalMatchController {
   removeHumanView(car: number): boolean;
   /** Attach (or clear with null) the driver for the match's bot cars. The caller owns it. */
   setBotDriver(driver: Pick<BotDriver, "tick" | "controls"> | null): void;
+  /** Display names per car index, used by the goal banner. Optional for test doubles. */
+  setCarNames?(names: ReadonlyArray<string>): void;
   /** DEV ONLY: put the ball somewhere, native units (Z up). No-op in production builds. */
   debugPlaceBall(pos: [number, number, number], vel?: [number, number, number]): boolean;
 }

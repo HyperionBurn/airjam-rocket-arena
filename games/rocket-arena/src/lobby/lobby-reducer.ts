@@ -338,8 +338,13 @@ const reduceLobby = (state: LobbyState, action: LobbyAction): LobbyState => {
       // `seated` grows as we go, so each seed is assigned AUTO against the
       // players BEFORE it — the same order the incremental join path uses.
       const seated: LobbyPlayer[] = [];
+      // A player already in the room keeps their record (name typed on the phone, READY,
+      // team choice, car). Rebuilding everyone from the SDK seed reset all of that to
+      // "Player N / waiting" every time ANYONE joined or left, and the host only re-sends
+      // a phone's name/ready when the phone changes it, so it never came back.
+      const current = new Map(state.players.map((player) => [player.id, player]));
       const next = action.players.slice(0, MAX_PLAYER_SLOTS).map((seed) => {
-        const player = materializePlayer(seed, state.departed, seated, state.settings);
+        const player = current.get(seed.id) ?? materializePlayer(seed, state.departed, seated, state.settings);
         seated.push(player);
         return player;
       });

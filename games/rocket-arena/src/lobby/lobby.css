@@ -40,8 +40,10 @@
   --lob-danger: #fb7185;
   --lob-accent: #facc15;
 
-  /* Scales the whole screen with the projector. */
-  font-size: clamp(15px, 0.62vw + 0.42rem, 30px);
+  /* Scales the whole screen with the projector: by width OR height, whichever is tighter
+     (vw alone made a normal laptop window, wider than 16:9, overflow at the bottom:
+     START MATCH and the room code fell off-screen). At 16:9 the two are identical. */
+  font-size: clamp(15px, min(0.62vw, 1.102vh) + 0.42rem, 30px);
   color: var(--lob-ink);
 }
 
@@ -90,7 +92,7 @@
 
 .lobby-title {
   margin: 0;
-  font-size: clamp(1.9rem, 4.4vw, 4.4rem);
+  font-size: clamp(1.9rem, min(4.4vw, 7.823vh), 4.4rem);
   font-weight: 900;
   letter-spacing: 0.06em;
   line-height: 0.95;
@@ -110,7 +112,7 @@
 }
 
 .lobby-roomcode {
-  font-size: clamp(1rem, 1.5vw, 1.6rem);
+  font-size: clamp(1rem, min(1.5vw, 2.667vh), 1.6rem);
   font-weight: 800;
   letter-spacing: 0.22em;
   padding: 0.35em 0.9em;
@@ -126,7 +128,7 @@
 }
 
 .lobby-eventmode {
-  font-size: clamp(0.85rem, 1.1vw, 1.2rem);
+  font-size: clamp(0.85rem, min(1.1vw, 1.956vh), 1.2rem);
   font-weight: 900;
   letter-spacing: 0.18em;
   padding: 0.4em 0.9em;
@@ -214,7 +216,7 @@
 
 .lobby-join__cta {
   margin: 0;
-  font-size: clamp(1.25rem, 2.4vw, 2.6rem);
+  font-size: clamp(1.25rem, min(2.4vw, 4.267vh), 2.6rem);
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -223,7 +225,7 @@
 
 .lobby-join__code {
   margin: 0;
-  font-size: clamp(2.2rem, 5.2vw, 5.4rem);
+  font-size: clamp(2.2rem, min(5.2vw, 9.246vh), 5.4rem);
   font-weight: 900;
   letter-spacing: 0.16em;
   line-height: 1;
@@ -242,7 +244,7 @@
 
 .lobby-join__count {
   margin: 0.2em 0 0;
-  font-size: clamp(1.15rem, 2.1vw, 2.1rem);
+  font-size: clamp(1.15rem, min(2.1vw, 3.734vh), 2.1rem);
   font-weight: 900;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -285,7 +287,7 @@
   border-radius: 0.6em;
   border-left: 0.35em solid var(--lob-ink-faint);
   background: rgba(148, 163, 184, 0.08);
-  font-size: clamp(0.95rem, 1.35vw, 1.4rem);
+  font-size: clamp(0.95rem, min(1.35vw, 2.4vh), 1.4rem);
   font-weight: 700;
 }
 
@@ -437,7 +439,7 @@
   background: rgba(148, 163, 184, 0.12);
   color: var(--lob-ink);
   font-family: inherit;
-  font-size: clamp(0.85rem, 1.15vw, 1.2rem);
+  font-size: clamp(0.85rem, min(1.15vw, 2.045vh), 1.2rem);
   font-weight: 900;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -469,7 +471,7 @@
   background: var(--lob-accent);
   border-color: #fef08a;
   color: #0b1120;
-  font-size: clamp(1.15rem, 2vw, 2.1rem);
+  font-size: clamp(1.15rem, min(2vw, 3.556vh), 2.1rem);
   padding: 0.8em 1.2em;
 }
 
@@ -586,7 +588,7 @@
 }
 
 .lobby-scoreboard__clock {
-  font-size: clamp(1.6rem, 3.4vw, 3.6rem);
+  font-size: clamp(1.6rem, min(3.4vw, 6.045vh), 3.6rem);
   font-weight: 900;
   letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
@@ -598,7 +600,7 @@
   display: flex;
   align-items: center;
   gap: 0.4em;
-  font-size: clamp(3rem, 9vw, 9rem);
+  font-size: clamp(3rem, min(9vw, 16.002vh), 9rem);
   font-weight: 900;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -633,7 +635,7 @@
 
 .lobby-postmatch__title {
   margin: 0;
-  font-size: clamp(2rem, 6vw, 6rem);
+  font-size: clamp(2rem, min(6vw, 10.668vh), 6rem);
   font-weight: 900;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -653,7 +655,7 @@
 }
 
 .lobby-postmatch__score {
-  font-size: clamp(2.4rem, 7vw, 7rem);
+  font-size: clamp(2.4rem, min(7vw, 12.446vh), 7rem);
   font-weight: 900;
   font-variant-numeric: tabular-nums;
   line-height: 1;

@@ -452,6 +452,27 @@ describe("store container", () => {
     expect(store.getState().players).toHaveLength(2);
   });
 
+  it("a sync for a new arrival keeps everyone else's name, ready and team", () => {
+    const store = createLobbyStore();
+    store.dispatch({ type: "players/sync", players: [{ id: "a", name: "Player 0" }] });
+    store.dispatch({ type: "player/rename", id: "a", name: "ROCKET RAYAN" });
+    store.dispatch({ type: "player/team", id: "a", choice: "orange" });
+    store.dispatch({ type: "player/ready", id: "a", ready: true });
+    // a second phone joins: the SDK list now has both, with its default labels
+    store.dispatch({
+      type: "players/sync",
+      players: [
+        { id: "a", name: "Player 0" },
+        { id: "b", name: "Player 1" },
+      ],
+    });
+    const a = store.getState().players.find((p) => p.id === "a");
+    expect(a?.name).toBe("ROCKET RAYAN");
+    expect(a?.ready).toBe(true);
+    expect(a?.team).toBe(1); // orange
+    expect(store.getState().players).toHaveLength(2);
+  });
+
   it("produces one car binding intent per seated player", () => {
     const store = createLobbyStore();
     for (const id of ["a", "b"]) {

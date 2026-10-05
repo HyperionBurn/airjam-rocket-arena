@@ -239,6 +239,21 @@ describe("Rocket League driving feel", () => {
     expect(controls.steer).toBeGreaterThan(0.7);
   });
 
+  it("pushing straight sideways drives and turns (a stopped car cannot turn without throttle)", () => {
+    const left = driveWith({ x: -1, y: 0 });
+    expect(left.throttle).toBe(1);
+    expect(left.steer).toBe(-1);
+    const gentle = driveWith({ x: 0.3, y: 0 });
+    expect(gentle.throttle).toBeGreaterThan(0.3);
+    expect(gentle.steer).toBeGreaterThan(0.25);
+  });
+
+  it("pulling clearly back still brakes and reverses, with steering", () => {
+    const back = driveWith({ x: 0.3, y: -0.9 });
+    expect(back.throttle).toBeLessThan(0);
+    expect(back.steer).toBeGreaterThan(0.25);
+  });
+
   it("boost drives the car forward even with the stick centred", () => {
     expect(driveWith({ x: 0, y: 0 }, { boost: true }).throttle).toBe(1);
     expect(driveWith({ x: 0.4, y: 0 }, { boost: true }).throttle).toBe(1);

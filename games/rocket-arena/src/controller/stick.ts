@@ -23,7 +23,7 @@
  * again on the host stacked a second deadzone and a second curve on top, so half
  * a stick push reached the car as a few percent of steering.
  */
-export const STICK_DEADZONE = 0.06;
+export const STICK_DEADZONE = 0.08;
 
 /**
  * Curve exponent applied to the post-deadzone magnitude. 1 is linear; higher
@@ -31,7 +31,7 @@ export const STICK_DEADZONE = 0.06;
  * corrections precise without making the car feel numb: a gamepad's stick is
  * close to linear and so is Rocket League's steering.
  */
-export const STICK_EXPO = 1.2;
+export const STICK_EXPO = 1.35;
 
 export interface StickShapeOptions {
   readonly deadzone?: number;

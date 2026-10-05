@@ -209,6 +209,14 @@ const GROUND_THROTTLE_GAIN = 1.6;
 const BOOST_DRIVES_ABOVE = -0.5;
 /** Steering reaches full lock a little before the stick is fully pushed. */
 const GROUND_STEER_GAIN = 1.15;
+/**
+ * Phones: on the ground any push that is not clearly pulled back DRIVES, with the push
+ * length as throttle. Before, throttle was only the stick's Y, so pushing straight left
+ * meant zero throttle, and a car that is not moving cannot turn: "I push left and nothing
+ * happens", and every hard turn bled speed. Pulled back past this (about 120 degrees from
+ * straight up) the stick brakes and reverses, as before.
+ */
+const PULL_BACK_RATIO = -0.5;
 
 const unit = (value: number): number => (value < -1 ? -1 : value > 1 ? 1 : value);
 
@@ -223,11 +231,14 @@ const mapToControls = (
   // The air-roll affordance, exactly as `touch.js:215` composes it.
   const airRollHeld = input.handbrake || input.airRoll;
   // A gamepad sends its trigger throttle; a phone's single stick is throttle too.
+  const push = Math.hypot(stick.x, stick.y);
   let throttle =
     onGround && input.throttle !== null
       ? input.throttle
       : onGround
-        ? unit(stick.y * GROUND_THROTTLE_GAIN)
+        ? stick.y < PULL_BACK_RATIO * push
+          ? unit(stick.y * GROUND_THROTTLE_GAIN)
+          : unit(push * GROUND_THROTTLE_GAIN)
         : stick.y;
   if (onGround && input.boost && stick.y > BOOST_DRIVES_ABOVE) throttle = 1;
   return sanitizeControls({

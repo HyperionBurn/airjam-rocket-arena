@@ -1,3 +1,5 @@
+// Two phones: the first phone's name and READY must survive the second phone joining.
+//   node tools/e2e/names-test.mjs   (dev server running)
 import { chromium } from "playwright";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const b = await chromium.launch({ channel: "chromium", args: ["--use-angle=d3d11"] });
@@ -29,4 +31,9 @@ await sleep(4000);
 await roster("4 s later:");
 await p1.bringToFront(); await sleep(2000);
 await roster("phone1 back in front:");
+// pass/fail: a second phone joining must not reset the first phone's name or READY
+const final = await host.evaluate(() => window.__ra.store.getState().players.map((p) => [p.name, p.ready]));
+const ok = final.some(([n, r]) => n === "ALPHA" && r) && final.some(([n, r]) => n === "BRAVO" && r);
+console.log(ok ? "PASS names and READY survive a join" : "FAIL names/READY were reset by a join");
 await b.close();
+process.exit(ok ? 0 : 1);

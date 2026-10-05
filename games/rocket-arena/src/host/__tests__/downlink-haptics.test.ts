@@ -8,6 +8,12 @@ import { decodeDownlink, encodeDownlink } from "@/host/downlink";
 import { HIT_HAPTIC_INTERVAL_MS, createHapticPlanner, type SeatMap } from "@/host/haptics";
 
 describe("downlink codec", () => {
+  it("carries the player's team when the host sends it (old payloads stay valid)", () => {
+    const decoded = decodeDownlink(encodeDownlink({ a: { boost: 10, airborne: false, demolished: false, team: 1 } }));
+    expect(decoded?.seats.a?.team).toBe(1);
+    expect(decodeDownlink('{"v":1,"s":{"b":[5,0,0]}}')?.seats.b?.team).toBeUndefined();
+  });
+
   it("round-trips a readout per phone", () => {
     const raw = encodeDownlink({
       "pad-1": { boost: 84, airborne: false, demolished: false },

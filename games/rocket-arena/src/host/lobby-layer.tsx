@@ -8,7 +8,7 @@
  * donor match. Pressing START here only changes lobby state; it never reaches
  * into the donor itself.
  */
-import { useEffect, useMemo } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useAirJamHost } from "@air-jam/sdk";
 import { useRoomPlayers } from "@/host/use-players";
 
@@ -54,15 +54,82 @@ export const LobbyLayer = ({ hidden }: LobbyLayerProps) => {
     });
   }, [store, players]);
 
+  const fitRef = useRef<HTMLDivElement>(null);
+  useFitToWindow(fitRef, hidden);
+
   if (hidden) return null;
 
   return (
-    <div data-lobby-root style={{ position: "fixed", inset: 0, zIndex: 9_000 }}>
-      <LobbyStoreProvider store={store}>
-        <HostLobbyScreen title="Rocket Arena" />
-      </LobbyStoreProvider>
+    <div data-lobby-root style={{ position: "fixed", inset: 0, zIndex: 9_000, overflow: "hidden" }}>
+      <div ref={fitRef} data-lobby-fit style={{ position: "absolute", left: 0, top: 0, width: "100%", height: "100%" }}>
+        <LobbyStoreProvider store={store}>
+          <HostLobbyScreen title="Rocket Arena" />
+        </LobbyStoreProvider>
+      </div>
     </div>
   );
+};
+
+/**
+ * Scale the lobby down until everything fits the window. It was laid out for a 16:9
+ * projector; in a normal laptop window (e.g. 1440x680 at 200% Windows scaling) the room
+ * code, the settings column and START MATCH ran off the bottom of the screen. The wrapper
+ * is laid out at (window / scale) and drawn scaled, so nothing is clipped and clicks still
+ * land (transforms are hit-tested). At 16:9 full screen the scale stays 1.
+ */
+const useFitToWindow = (ref: { current: HTMLDivElement | null }, hidden: boolean): void => {
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (hidden || !el) return;
+    const apply = (scale: number): void => {
+      const s = el.style;
+      if (scale >= 0.999) {
+        s.transform = ""; s.width = "100%"; s.height = "100%";
+      } else {
+        s.transformOrigin = "0 0";
+        s.transform = `scale(${scale})`;
+        s.width = `${100 / scale}%`;
+        s.height = `${100 / scale}%`;
+      }
+    };
+    const extent = (): { bottom: number; right: number } => {
+      let bottom = 0, right = 0;
+      el.querySelectorAll("*").forEach((node) => {
+        const r = node.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) return;
+        if (r.bottom > bottom) bottom = r.bottom;
+        if (r.right > right) right = r.right;
+      });
+      return { bottom, right };
+    };
+    const fit = (): void => {
+      let scale = 1;
+      apply(scale);
+      for (let i = 0; i < 5; i += 1) {
+        const { bottom, right } = extent();
+        const over = Math.max(bottom / window.innerHeight, right / window.innerWidth);
+        if (over <= 1.002) break;
+        scale = Math.max(0.4, (scale / over) * 0.995);
+        apply(scale);
+      }
+    };
+    let frame = 0;
+    const schedule = (): void => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => { frame = 0; fit(); });
+    };
+    fit();
+    window.addEventListener("resize", schedule);
+    // roster rows, announcements and settings change the content height
+    const watch = new MutationObserver(schedule);
+    watch.observe(el, { childList: true, subtree: true, characterData: true });
+    return () => {
+      window.removeEventListener("resize", schedule);
+      watch.disconnect();
+      if (frame) window.cancelAnimationFrame(frame);
+      apply(1);
+    };
+  }, [ref, hidden]);
 };
 
 export { EVENT_MODE_SETTINGS };

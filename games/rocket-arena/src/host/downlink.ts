@@ -7,8 +7,8 @@
  * second and every phone reads just its own entry. The payload is keyed by
  * controller id, so a phone never needs to know which car is which.
  *
- *   {"v":1,"s":{"pad-1":[84,0,0],"pad-2":[12,1,0]}}
- *                          boost ^  ^ airborne  ^ demolished
+ *   {"v":1,"s":{"pad-1":[84,0,0,1],"pad-2":[12,1,0,0]}}
+ *                          boost ^  ^ airborne  ^ demolished  ^ team (0 blue, 1 orange; optional)
  *
  * An absent key means "you have no car in this match" (a spectator).
  */
@@ -18,6 +18,8 @@ export interface PhoneReadout {
   boost: number;
   airborne: boolean;
   demolished: boolean;
+  /** The car's team (0 blue, 1 orange), so the phone can badge you in your colour. */
+  team?: 0 | 1 | null;
 }
 
 export interface Downlink {
@@ -28,9 +30,11 @@ const clampBoost = (value: number): number =>
   Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value))) : 0;
 
 export const encodeDownlink = (seats: Readonly<Record<string, PhoneReadout>>): string => {
-  const compact: Record<string, [number, 0 | 1, 0 | 1]> = {};
+  const compact: Record<string, (number)[]> = {};
   for (const [playerId, readout] of Object.entries(seats)) {
-    compact[playerId] = [clampBoost(readout.boost), readout.airborne ? 1 : 0, readout.demolished ? 1 : 0];
+    const entry = [clampBoost(readout.boost), readout.airborne ? 1 : 0, readout.demolished ? 1 : 0];
+    if (readout.team === 0 || readout.team === 1) entry.push(readout.team);
+    compact[playerId] = entry;
   }
   return JSON.stringify({ v: 1, s: compact });
 };
@@ -50,11 +54,13 @@ export const decodeDownlink = (raw: string | null | undefined): Downlink | null 
   const seats: Record<string, PhoneReadout> = {};
   for (const [playerId, entry] of Object.entries(message.s as Record<string, unknown>)) {
     if (!Array.isArray(entry)) continue;
-    seats[playerId] = {
+    const readout: PhoneReadout = {
       boost: clampBoost(Number(entry[0])),
       airborne: entry[1] === 1,
       demolished: entry[2] === 1,
     };
+    if (entry[3] === 0 || entry[3] === 1) readout.team = entry[3];
+    seats[playerId] = readout;
   }
   return { seats };
 };

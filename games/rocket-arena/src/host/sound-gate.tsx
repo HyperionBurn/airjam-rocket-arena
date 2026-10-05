@@ -39,10 +39,10 @@ export const SoundGate = () => {
       role="status"
       style={{
         position: "fixed",
-        // Top centre, just under the scoreboard: the corners belong to each
-        // viewport's boost and speed readouts.
+        // Bottom centre: at the top it covered the lobby's ROSTER heading. It only
+        // shows until the first click (START MATCH counts), so it never sits on play.
         left: "50%",
-        top: 84,
+        bottom: 14,
         transform: "translateX(-50%)",
         zIndex: 9_500,
         padding: "8px 14px",

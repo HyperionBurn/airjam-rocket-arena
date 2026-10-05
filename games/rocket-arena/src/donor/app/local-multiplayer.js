@@ -711,7 +711,10 @@ export function createLocalMultiplayer(ctx) {
         scorerIndex: goal.scorerIndex,
         team: goal.team,
         mode: goal.mode,
-        scorerName: `PLAYER ${goal.scorerIndex + 1}`,
+        // the scorer's own name (phone nickname, or CPU), not "PLAYER 3"
+        scorerName: st.carNames && st.carNames[goal.scorerIndex]
+          ? String(st.carNames[goal.scorerIndex]).toUpperCase()
+          : `PLAYER ${goal.scorerIndex + 1}`,
       });
       renderGoalShot();
       profiler.frameEnd(clock.lastTicks, clock.lastDropped, clock.lastStalled);
@@ -908,6 +911,10 @@ export function createLocalMultiplayer(ctx) {
      */
     setBotDriver(driver) {
       st.botDriver = driver ?? null;
+    },
+    /** Display names per car index (humans' nicknames, then "CPU"), for the goal banner. */
+    setCarNames(names) {
+      st.carNames = Array.isArray(names) ? names.map((n) => (n == null ? "" : String(n))) : null;
     },
     /** Max cars in a local match. */
     maxCars: MAX_LOCAL_CARS,

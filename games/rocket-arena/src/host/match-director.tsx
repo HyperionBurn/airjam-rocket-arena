@@ -130,11 +130,11 @@ export const MatchDirector = ({ runtime, controller, store, onActiveChange }: Ma
   const refreshSeatNames = (): void => {
     const lobbyNames = new Map(store.getState().players.map((player) => [player.id, player.name]));
     const sdkNames = new Map(playersRef.current.map((player) => [player.id, player.label]));
-    setSeatNames(
-      seatsRef.current.map((seat) => ({
-        name: seat.playerId ? (lobbyNames.get(seat.playerId) ?? sdkNames.get(seat.playerId) ?? "Player") : "CPU",
-      })),
+    const names = seatsRef.current.map((seat) =>
+      seat.playerId ? (lobbyNames.get(seat.playerId) ?? sdkNames.get(seat.playerId) ?? "Player") : "CPU",
     );
+    setSeatNames(names.map((name) => ({ name })));
+    controller.setCarNames?.(names);
   };
 
   // Phone-room runtime state: "playing" only while a match is live. A retry
@@ -382,8 +382,14 @@ export const MatchDirector = ({ runtime, controller, store, onActiveChange }: Ma
       if (polls % DOWNLINK_EVERY_POLLS === 0) {
         const readouts: Record<string, PhoneReadout> = {};
         for (const view of next.views) {
-          const playerId = seatsRef.current[view.car]?.playerId;
-          if (playerId) readouts[playerId] = { boost: view.boost, airborne: view.airborne, demolished: view.demolished };
+          const seat = seatsRef.current[view.car];
+          const playerId = seat?.playerId;
+          if (playerId) {
+            readouts[playerId] = {
+              boost: view.boost, airborne: view.airborne, demolished: view.demolished,
+              team: seat.team === 1 ? 1 : 0,
+            };
+          }
         }
         hostRef.current.sendState({ message: encodeDownlink(readouts) });
       }

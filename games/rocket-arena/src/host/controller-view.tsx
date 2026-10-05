@@ -164,6 +164,23 @@ export const ControllerSurface = () => {
         ready={ready}
         onReadyChange={setReady}
       />
+      {isPlaying && mine ? (
+        // who you are, in your team's colour, matching your name on the big screen
+        <div
+          data-testid="ra-phone-me"
+          style={{
+            position: "fixed", left: 12, top: 10, zIndex: 40, pointerEvents: "none",
+            display: "flex", alignItems: "center", gap: 8, maxWidth: "40vw",
+            padding: "5px 12px", borderRadius: 999, background: "rgba(2, 16, 31, 0.8)",
+            border: `2px solid ${mine.team === 1 ? "#fb923c" : "#38bdf8"}`,
+            color: "#f8fafc", font: "800 14px/1.2 system-ui, sans-serif", letterSpacing: "0.06em",
+            textTransform: "uppercase", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}
+        >
+          <span style={{ width: 10, height: 10, borderRadius: "50%", flex: "none", background: mine.team === 1 ? "#fb923c" : "#38bdf8" }} />
+          {nickname.trim() || "Driver"}
+        </div>
+      ) : null}
       {spectating ? (
         <div
           role="status"

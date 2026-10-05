@@ -824,6 +824,9 @@ export function createLocalMultiplayer(ctx) {
         const kernel = await createCameraKernel();
         const cam = new ChaseCamera(window.innerWidth / window.innerHeight, kernel);
         Object.assign(cam.settings, ctx.baseCamera.settings);
+        // Car cam by default: steering is car-relative, and with ball cam the view faces the
+        // ball, so "stick left" often did not look like left on screen. CAM still toggles.
+        cam.ballCam = false;
         st.cams.push(cam);
         st.camFov.push(cam.camera.fov);
         st.camState.push({ onGround: false, groundNormal: new F(), velocity: new F(), supersonic: false, lookX: 0, lookY: 0 });

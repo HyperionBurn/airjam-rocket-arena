@@ -588,3 +588,7 @@
     transition: none;
   }
 }
+
+/* Bigger catch area for the floating stick: a thumb that lands just outside the drawn
+   circle still grabs it (the origin is wherever the thumb lands anyway). */
+.ra-tc-stick::before { content: ""; position: absolute; inset: -28%; border-radius: 50%; }

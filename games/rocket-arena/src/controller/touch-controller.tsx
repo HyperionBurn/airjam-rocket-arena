@@ -309,7 +309,7 @@ const BUTTONS = [
   { id: "boost", glyph: "↗", ground: "Boost", air: "Boost", className: "ra-tc-btn--boost" },
   { id: "jump", glyph: "↑", ground: "Jump", air: "Jump", className: "ra-tc-btn--jump" },
   { id: "ballCam", glyph: "◉", ground: "Cam", air: "Cam", className: "ra-tc-btn--minor ra-tc-btn--ballcam" },
-  { id: "reverse", glyph: "⇩", ground: "Rev", air: "Rev", className: "ra-tc-btn--minor ra-tc-btn--reverse" },
+  // (REV removed: it was never sent to the game. Pulling the stick back reverses.)
 ] as const;
 
 const TouchGameplay = ({

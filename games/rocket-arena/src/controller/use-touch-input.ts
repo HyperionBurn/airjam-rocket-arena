@@ -62,7 +62,7 @@ import { offsetFromOrigin, shapeStick } from "./stick";
  * Fraction of the stick pad's width the knob is allowed to travel. The pad is
  * deliberately larger than the travel so a thumb never feels like it hit a wall.
  */
-const STICK_TRAVEL_FRACTION = 0.5;
+const STICK_TRAVEL_FRACTION = 0.8; // was 0.5: ~36 px of travel made full lock a 5 mm flick
 
 /** Knob diameter as a fraction of the pad, for the visual. */
 const STICK_KNOB_FRACTION = 0.46;

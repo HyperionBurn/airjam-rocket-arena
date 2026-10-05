@@ -133,8 +133,10 @@ export const launchUrl = (
     players: ReadonlyArray<Pick<SessionPlayer, "id" | "name" | "color" | "avatar">>;
     totalSeconds?: number;
   },
+  /** Which of the game's pages to open: the big screen (default) or its moderator console. */
+  page: "host" | "console" = "host",
 ): string => {
-  const url = new URL(game.hostUrl);
+  const url = new URL(page === "console" ? (game.consoleUrl ?? game.hostUrl) : game.hostUrl);
   url.searchParams.set("arcade", input.hubOrigin);
   url.searchParams.set("session", input.code);
   url.searchParams.set("round", input.roundId);

@@ -44,6 +44,7 @@ describe("scoring", () => {
 
   it("rejects strangers, duplicates and bad ranks", () => {
     expect(() => normalizePlacements([{ playerId: "zzz", rank: 1 }], ["a"])).toThrow(PlacementError);
+    expect(normalizePlacements([{ playerId: "a", rank: 1, group: "Blue" }], ["a"])[0]!.group).toBe("Blue");
     expect(() => normalizePlacements([{ playerId: "a", rank: 1 }, { playerId: "a", rank: 2 }], ["a"])).toThrow(PlacementError);
     expect(() => normalizePlacements([{ playerId: "a", rank: 0 }], ["a"])).toThrow(PlacementError);
     expect(() => normalizePlacements([{ playerId: "a", rank: 1.5 }], ["a"])).toThrow(PlacementError);
@@ -88,9 +89,9 @@ describe("voting", () => {
   });
 
   it("filters the ballot by player count but never leaves it empty", () => {
-    expect(eligibleGames(DEFAULT_GAMES, 8).map((g) => g.id)).toEqual(["air-brawl"]);
-    expect(eligibleGames(DEFAULT_GAMES, 20)).toHaveLength(3);
-    expect(eligibleGames(DEFAULT_GAMES, 4)).toHaveLength(3);
+    expect(eligibleGames(DEFAULT_GAMES, 8).map((g) => g.id)).toEqual(["air-brawl", "family-feud"]);
+    expect(eligibleGames(DEFAULT_GAMES, 20)).toHaveLength(DEFAULT_GAMES.length);
+    expect(eligibleGames(DEFAULT_GAMES, 4)).toHaveLength(DEFAULT_GAMES.length);
     expect(brawl).toBeDefined();
   });
 });

@@ -57,6 +57,7 @@ const placement = z.object({
   rank: z.number().int().min(1).nullable(),
   score: z.number().finite().optional(),
   stats: z.record(z.string().max(24), z.number().finite()).optional(),
+  group: z.string().max(40).optional(),
 });
 
 const resultBody = z.object({ placements: z.array(placement).max(16) });

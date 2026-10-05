@@ -5,7 +5,8 @@ One front door for every game in the room: players join **once** by QR, vote on 
 ```
 phones ──▶ /play/ABCD  ┐                              ┌─▶ Rocket Arena   (adapter, in-repo)
                        ├─ hub (REST + WebSocket) ─────┼─▶ Turbo Kart     (manual until adapted)
-big screen ▶ /host/ABCD┘   players · votes · scores   └─▶ Air Brawl      (manual until adapted)
+big screen ▶ /host/ABCD┘   players · votes · scores   ├─▶ Air Brawl      (manual until adapted)
+                                                      └─▶ Family Feud    (adapter in its own repo; host-led)
 ```
 
 The hub owns **players, voting, scoring, leaderboards and the front end**. A game owns only its gameplay and speaks a four-call contract (below).
@@ -53,14 +54,21 @@ The round token is a bearer token for **that round only**; phones never see it. 
 |---|---|---|
 | `POST /api/rounds/:id/ready` | `{ controllerUrl }` | the game is up. `controllerUrl` is the page phones should show, with `{playerId}` `{name}` `{color}` placeholders the hub fills per phone (`null` if phones need nothing) |
 | `POST /api/rounds/:id/progress` | `{ scores: { [playerId]: number } }` | optional, drives the live HUD |
-| `POST /api/rounds/:id/result` | `{ placements: [{ playerId, rank, score?, stats? }] }` | the finishing order. `rank` 1 is first, equal ranks tie, `null` is did-not-finish |
+| `POST /api/rounds/:id/result` | `{ placements: [{ playerId, rank, score?, stats?, group? }] }` | the finishing order. `rank` 1 is first, equal ranks tie, `null` is did-not-finish; `group` names a player's side in team games so a team win reads as a win, not a tie |
 
 A game that does not skip its own lobby, take the hub's player list, and post a result is **manual**: the host taps the finishing order in a panel under the game. That works with zero changes to the game, which is how a new game gets on the board on day one.
+
+### Host-led games (a private console next to the big screen)
+
+A game like Family Feud is run by a person, with answers only they may see. Give its catalogue entry a `consoleUrl`. The hub then offers **Open the console** in the host controls, which opens `/host/ABCD/console` in a second window: a thin shell that embeds the game's console for the live round. The shell exists so the console and the big-screen iframe share one browser partition (same top-level site, same game origin); opened straight at the game's own address, a console would sit in a different partition and could not talk to the embedded screen. The console holds the round token, so it can post the result. Side effect: anything the game keeps in browser storage (Family Feud's survey results) is stored for that embedding, not for the game's own address.
+
+Whoever runs the game decides when it is over: Family Feud shows a **Send the result to the arcade** button rather than posting the moment the last answer lands.
 
 ### Writing an adapter
 
 - **Any game, no framework:** load [`/arcade-client.js`](public/arcade-client.js) (it is served by the hub) and use `ArcadeClient.fromUrl()`, `.ready()`, `.progress()`, `.result()`, and `ArcadeClient.rank(players, scores)` to turn scores into placements.
 - **Rocket Arena** is the worked example: [`games/rocket-arena/src/host/arcade.ts`](../../games/rocket-arena/src/host/arcade.ts) (pure, tested), [`arcade-bridge.tsx`](../../games/rocket-arena/src/host/arcade-bridge.tsx) (hides the lobby, starts when the hub's players are in, posts the result). Its phone controller is told the player's name and the hub's id through the template (`controllerId={playerId}`), so Air Jam player ids *are* hub player ids.
+- **Family Feud** ([`HyperionBurn/Family-Feud`](https://github.com/HyperionBurn/Family-Feud), a fork with `src/arcade/`) splits the hub's players into two teams, prefills the team names, and sends the winning team first place.
 - Use the hub's `id` as your player id wherever you can. It keeps results free of lookup tables.
 
 ## Layout

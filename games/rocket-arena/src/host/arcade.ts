@@ -36,6 +36,7 @@ export interface HubPlacement {
   rank: number | null;
   score?: number;
   stats?: Record<string, number>;
+  group?: string;
 }
 
 const fromBase64Url = (value: string): string => {
@@ -143,7 +144,7 @@ export const placementsFor = (expected: readonly ArcadePlayer[], final: FinalSco
     if (team === undefined) return { playerId: player.id, rank: null };
     const goals = team === 0 ? final.blue : final.orange;
     const against = team === 0 ? final.orange : final.blue;
-    return { playerId: player.id, rank: draw || team === winner ? 1 : 2, score: goals, stats: { goals, against } };
+    return { playerId: player.id, rank: draw || team === winner ? 1 : 2, score: goals, stats: { goals, against }, group: team === 0 ? "Blue" : "Orange" };
   });
 };
 

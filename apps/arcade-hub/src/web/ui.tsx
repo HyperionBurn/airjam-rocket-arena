@@ -198,6 +198,26 @@ export const GameArt = ({ game }: { game: Pick<GameDef, "id"> }) => {
         <circle cx="110" cy="90" r="7" fill="#F3F8FF" />
       </>
     );
+  } else if (game.id === "family-feud") {
+    // The survey board: eight answer slots, three already turned over, and one miss.
+    const solid = new Set([0, 3, 4]);
+    shapes = (
+      <>
+        {Array.from({ length: 8 }, (_, i) => {
+          const col = i % 2;
+          const row = Math.floor(i / 2);
+          const x = 24 + col * 136;
+          const y = 22 + row * 44;
+          return solid.has(i) ? (
+            <rect key={i} x={x} y={y} width="124" height="34" fill="#F3F8FF" />
+          ) : (
+            <rect key={i} x={x} y={y} width="124" height="34" fill="none" stroke="#CFE0FF" strokeOpacity="0.55" strokeWidth="2" />
+          );
+        })}
+        <line x1="212" y1="150" x2="250" y2="190" stroke="#F3F8FF" strokeWidth="6" />
+        <line x1="250" y1="150" x2="212" y2="190" stroke="#F3F8FF" strokeWidth="6" />
+      </>
+    );
   } else {
     const h = hash(game.id);
     shapes = (

@@ -46,6 +46,20 @@ export const DEFAULT_GAMES: GameDef[] = [
     integration: "manual",
     hostUrl: "https://air-brawl.onrender.com/",
   },
+  {
+    // Host-led: the big screen is the board; one moderator runs it from a console window the hub opens.
+    id: "family-feud",
+    name: "Family Feud",
+    tagline: "Two teams, a survey, one board. Run by the hosts.",
+    accent: "#cfe0ff",
+    icon: "",
+    minPlayers: 2,
+    maxPlayers: 8,
+    minutes: 12,
+    integration: "arcade",
+    hostUrl: "https://airjam-family-feud.onrender.com/screen/local",
+    consoleUrl: "https://airjam-family-feud.onrender.com/host",
+  },
 ];
 
 /** The catalogue, honouring an optional JSON override. */

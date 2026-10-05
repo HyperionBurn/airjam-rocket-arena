@@ -33,6 +33,11 @@ export interface GameDef {
    * report a per-player controller URL themselves when the round is ready.
    */
   joinUrl?: string;
+  /**
+   * Host-led games only: a private moderator page that runs alongside the big-screen
+   * page (hostUrl). The hub opens it in its own window so it never shows on the projector.
+   */
+  consoleUrl?: string;
 }
 
 /** A persistent identity, remembered on the phone. Public part only. */
@@ -71,6 +76,8 @@ export interface Placement {
   score?: number;
   /** A few labelled numbers (goals, KOs, laps...) for the recap. */
   stats?: Record<string, number>;
+  /** Team games: the side this player was on. Players sharing rank 1 and one group are a team win, not a tie. */
+  group?: string;
 }
 
 export interface Ruleset {

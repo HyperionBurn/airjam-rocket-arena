@@ -155,7 +155,7 @@ const Playing = ({ room, state }: { room: Room; state: PublicState }) => {
   const players = state.players.filter((player) => round.playerIds.includes(player.id));
   const roundToken = state.host?.roundToken ?? "";
   const [splashGone, setSplashGone] = useState(false);
-  const [panel, setPanel] = useState(game.integration === "manual");
+  const [panel, setPanel] = useState(game.integration === "manual" || Boolean(game.consoleUrl));
 
   // Stable URL for the whole round: re-renders must never reload the game.
   const url = useMemo(
@@ -196,6 +196,21 @@ const Playing = ({ room, state }: { room: Room; state: PublicState }) => {
       </div>
       {panel ? (
         <div className="panel">
+          {game.consoleUrl ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, maxWidth: "22em" }}>
+              <Label>Moderator console</Label>
+              <div className="mono">Private: it shows the answers. Open it on the laptop screen, never on the projector.</div>
+              <button
+                className="btn"
+                onClick={() => {
+                  window.open(`/host/${state.code}/console`, "arcade-console");
+                  setPanel(false);
+                }}
+              >
+                Open the console
+              </button>
+            </div>
+          ) : null}
           {game.integration === "manual" && game.joinUrl ? (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Label>Phones join here</Label>
@@ -223,7 +238,10 @@ const Results = ({ room, state }: { room: Room; state: PublicState }) => {
   const byId = new Map(state.players.map((player) => [player.id, player]));
   const ranked = (result?.placements ?? []).filter((p) => p.rank !== null).sort((a, b) => a.rank! - b.rank!);
   const dnf = (result?.placements ?? []).filter((p) => p.rank === null);
-  const winners = ranked.filter((p) => p.rank === 1).map((p) => byId.get(p.playerId)?.name).filter(Boolean);
+  const first = ranked.filter((p) => p.rank === 1);
+  const winners = first.map((p) => byId.get(p.playerId)?.name).filter(Boolean);
+  // Team games: everyone sharing first place on one side is that side winning, not a tie.
+  const winningGroup = first.length > 1 && first[0]!.group && first.every((p) => p.group === first[0]!.group) ? first[0]!.group : null;
   const last = round.number >= state.totalRounds;
   return (
     <div className="scene results">
@@ -231,7 +249,7 @@ const Results = ({ room, state }: { room: Room; state: PublicState }) => {
         <Label>
           Round {round.number}&nbsp;&nbsp;·&nbsp;&nbsp;{game.name}{result && result.multiplier > 1 ? `  ·  Finale ×${result.multiplier}` : ""}
         </Label>
-        <Display text={winners.length === 0 ? "Round over" : winners.length === 1 ? `${winners[0]} wins` : `${winners.join(" & ")} tie`} max={5} />
+        <Display text={winners.length === 0 ? "Round over" : winningGroup ? `${winningGroup} wins` : winners.length === 1 ? `${winners[0]} wins` : `${winners.join(" & ")} tie`} max={5} />
         <div className="list">
           {ranked.map((placement) => {
             const player = byId.get(placement.playerId);
@@ -292,6 +310,50 @@ const Champion = ({ room, state }: { room: Room; state: PublicState }) => {
           <a className="btn btn--outline" href="/leaderboard" target="_blank" rel="noreferrer">All-time leaderboard</a>
         </div>
       </aside>
+    </div>
+  );
+};
+
+/* ----------------------------------------------------------- moderator console */
+
+/**
+ * A host-led game's private console, in its own window. It is embedded from here (not opened
+ * straight at the game) so it sits in the same browser partition as the big-screen iframe:
+ * that is what lets the two windows talk over the game's own same-origin channel.
+ */
+export const HostConsoleWindow = ({ code }: { code: string }) => {
+  const token = hostTokenFor(code);
+  const room = useRoom(code, "host", token ?? "");
+  const state = room.state;
+  if (!token) return <Notice title="Not your room" body={`This browser didn't create room ${code}.`} action={{ href: "/", label: "Home" }} />;
+  if (room.closedReason) return <Notice title="Room closed" body={room.closedReason} action={{ href: "/", label: "Home" }} />;
+  if (!state) return <div className="ground center" style={{ maxWidth: "none", minHeight: "100%" }}><div className="spinner" /></div>;
+
+  const round = state.round;
+  const game = round && state.phase === "playing" ? gameOf(state.games, round.gameId) : undefined;
+  const roundToken = state.host?.roundToken ?? "";
+  const players = round ? state.players.filter((player) => round.playerIds.includes(player.id)) : [];
+  return (
+    <div className="ground" style={{ height: "100vh", display: "grid", gridTemplateRows: "auto minmax(0, 1fr)" }}>
+      <div className="row3 label" style={{ display: "flex", justifyContent: "space-between", gap: 16, padding: "10px 16px", borderBottom: "1px solid var(--line)" }}>
+        <span>Moderator console  ·  Private</span>
+        <span>{game ? `${game.name}  ·  Round ${round!.number} of ${state.totalRounds}` : "Waiting for a round"}</span>
+        <span>Room {state.code}</span>
+      </div>
+      {round && game?.consoleUrl && roundToken ? (
+        <iframe
+          key={round.id}
+          title={`${game.name} console`}
+          style={{ width: "100%", height: "100%", border: 0, background: "var(--frost)" }}
+          src={launchUrl(game, { hubOrigin: window.location.origin, code: state.code, roundId: round.id, roundToken, players }, "console")}
+          allow="autoplay; fullscreen; clipboard-write"
+        />
+      ) : (
+        <div className="center">
+          <Display text={state.phase === "playing" ? "No console for this game" : "Waiting for a round"} max={3} />
+          <p className="body">This window fills in when a game with a moderator console starts. You can leave it open for the whole night.</p>
+        </div>
+      )}
     </div>
   );
 };

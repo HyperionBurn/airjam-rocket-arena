@@ -30,6 +30,7 @@ import {
   type TouchControllerHandle,
   type TouchTeamPreference,
 } from "@/controller";
+import { isArcadeController } from "@/host/arcade";
 import { decodeDownlink } from "@/host/downlink";
 import { GARAGE_CARS } from "@/lobby/settings";
 
@@ -52,6 +53,15 @@ const scriptedStick = (mode: string, seconds: number): { x: number; y: number } 
   return { x: 0, y: 1 }; // fwd, boost
 };
 
+/**
+ * ARCADE HUB: a phone the hub opened
+ * arrives with the player's name and is ready from the first frame; the hub
+ * started the round, so there is nothing to confirm.
+ */
+const ARCADE_SEARCH = typeof window !== "undefined" ? window.location.search : "";
+const ARCADE_PHONE = isArcadeController(ARCADE_SEARCH);
+const ARCADE_NAME = ARCADE_PHONE ? (new URLSearchParams(ARCADE_SEARCH).get("nickname") ?? "") : "";
+
 /** The donor can only draw these bodies; the phone must not offer any other. */
 const PHONE_CARS: readonly TouchCarOption[] = GARAGE_CARS.map((car) => ({ id: car.id, label: car.label }));
 
@@ -70,10 +80,10 @@ export const ControllerSurface = () => {
   const runtimeStateRef = useRef(runtimeState);
   runtimeStateRef.current = runtimeState;
 
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useState(ARCADE_NAME);
   const [team, setTeam] = useState<TouchTeamPreference>("auto");
   const [carId, setCarId] = useState<string>(DEBUG_CAR ?? PHONE_CARS[0]?.id ?? "");
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(ARCADE_PHONE);
   // Scripted phones ready themselves so a harness run needs no taps.
   useEffect(() => {
     if (DEBUG_DRIVE !== null && !isPlaying) setReady(true);
@@ -88,7 +98,7 @@ export const ControllerSurface = () => {
   const wasPlaying = useRef(false);
   useEffect(() => {
     // (Scripted dev phones stay ready: they have no thumb to tap READY again.)
-    if (wasPlaying.current && !isPlaying && DEBUG_DRIVE === null) setReady(false);
+    if (wasPlaying.current && !isPlaying && DEBUG_DRIVE === null) setReady(ARCADE_PHONE);
     wasPlaying.current = isPlaying;
   }, [isPlaying]);
 

@@ -50,3 +50,4 @@ apps/platform/.next-smoke/
 # The canonical post.mdx, post.meta.ts, and devto.config.ts ARE tracked.
 content/blog/*/dev-to.md
 content/blog/*/media/
+apps/arcade-hub/data/

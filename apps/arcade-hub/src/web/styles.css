@@ -185,7 +185,7 @@ select.field option { color: #0a1b66; background: #f3f8ff; }
 .rank .pts { font-weight: 900; font-size: 1.25em; min-width: 2.4em; text-align: right; }
 .rank .gain { font-weight: 900; font-size: 1.6em; }
 .rank--1 { background: var(--accent); color: var(--on-accent); border-bottom-color: var(--accent); }
-.rank--1 .pos, .rank--1 .move { color: var(--on-accent); }
+.rank--1 .pos, .rank--1 .move, .rank--1 .label { color: var(--on-accent); }
 .rank--1 .sq { border-color: var(--on-accent); }
 .rank--big { grid-template-columns: 2.2em auto 1fr auto; padding: 0.8em 1em; font-size: 1.2em; }
 

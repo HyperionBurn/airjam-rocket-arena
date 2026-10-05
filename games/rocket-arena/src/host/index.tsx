@@ -23,6 +23,8 @@ import { createHostRuntime, type HostSnapshot } from "@/host/runtime";
 import { LobbyLayer, getLobbyStore } from "@/host/lobby-layer";
 import { MatchDirector } from "@/host/match-director";
 import { SoundGate } from "@/host/sound-gate";
+import { ArcadeBridge } from "@/host/arcade-bridge";
+import { readArcadeLaunch } from "@/host/arcade";
 import type { LocalMatchController } from "@/host/local-match";
 import type { gameInputSchema } from "@/host/input-schema";
 
@@ -66,6 +68,8 @@ export const HostSurface = () => {
   const [seamError, setSeamError] = useState<string | null>(null);
   const [controller, setController] = useState<LocalMatchController | null>(null);
   const [matchActive, setMatchActive] = useState(false);
+  // Launched by the arcade hub? Then the hub owns the roster and the lobby is skipped.
+  const arcade = useMemo(() => readArcadeLaunch(window.location.search), []);
 
   const getInput = useGetInput<typeof gameInputSchema>();
   // Phones and gamepads, as one roster.
@@ -219,7 +223,8 @@ export const HostSurface = () => {
   const runtime = runtimeRef.current;
   return (
     <>
-      <LobbyLayer hidden={matchActive} />
+      <LobbyLayer hidden={matchActive || arcade !== null} />
+      {arcade ? <ArcadeBridge launch={arcade} store={getLobbyStore()} matchActive={matchActive} /> : null}
       <SoundGate />
       {controller && runtime ? (
         <MatchDirector

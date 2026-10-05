@@ -2,7 +2,7 @@
 
 Goal: the hub, Rocket Arena and Family Feud all running **on this laptop**, reached by phones over the venue Wi-Fi, with no internet needed except for the two hosted fallback games. Round trip phone to game drops from about 180 ms (hosted) to about 10 ms.
 
-Follow the steps in order. Every command was run for real on Windows 11, Node 24; step 6 (`doctor`) tells you whether you got it right. Do not skip it.
+Follow the steps in order. Every command was run for real on Windows 11, Node 24, from a fresh clone; step 6 (`doctor`) tells you whether you got it right. Do not skip it.
 
 ```
 phones (Wi-Fi)  ─▶ http://<LAN-IP>:8787 ─▶ hub  ─┬─▶ Rocket Arena   http://localhost:5173  (+ Air Jam relay :4000)
@@ -39,7 +39,7 @@ git clone https://github.com/HyperionBurn/Family-Feud C:\arcade\Family-Feud
 # hub + Rocket Arena (and their workspace dependencies)
 cd C:\arcade\airjam-rocket-arena
 npx --yes pnpm@9.9.0 install --frozen-lockfile --filter "arcade-hub..." --filter "rocket-arena..."
-npx --yes pnpm@9.9.0 --filter @air-jam/sdk build
+npx --yes pnpm@9.9.0 --filter "@air-jam/sdk" build
 npx --yes pnpm@9.9.0 --filter arcade-hub build
 
 # Family Feud (NODE_ENV=development so the build tools install)
@@ -69,7 +69,7 @@ cd C:\arcade\airjam-rocket-arena\games\rocket-arena
 npx --yes pnpm@9.9.0 exec airjam dev
 ```
 
-Ready when it prints `Server listening on http://localhost:4000` and Vite's `Local: http://localhost:5173/`.
+Ready when it prints `Server listening on http://localhost:4000` and Vite's `Local: http://localhost:5173/`. The first start on a fresh checkout also builds some workspace packages, so allow up to a minute before ports 4000 and 5173 open (`doctor` in step 6 tells you when they do).
 
 ## 4. Start Family Feud (game + its own relay on :4100)
 

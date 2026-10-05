@@ -13,6 +13,8 @@ The hub owns **players, voting, scoring, leaderboards and the front end**. A gam
 
 ## Run
 
+Running a real night on one laptop (hub + Rocket Arena + Family Feud over the venue Wi-Fi, no internet)? Follow [`LOCAL-EVENT.md`](LOCAL-EVENT.md). The commands below are for developing the hub.
+
 ```bash
 pnpm --filter arcade-hub dev        # hub API :8787 + web :5180
 pnpm --filter arcade-hub test       # core rules + HTTP/WS integration + client script

@@ -10,6 +10,7 @@
  *   pnpm --filter arcade-hub run games:local
  *   pnpm --filter arcade-hub run games:local -- --host my-laptop.local    # only if the big screen is another machine
  *   flags: --rocket-port 5173  --feud-port 4100  --no-rocket  --no-feud
+ *          --kart-port 8081   also run Turbo Kart Rally from this laptop (its `npm start`), instead of Render
  *
  * Start the hub with ARCADE_GAMES_FILE=data/games.local.json (see apps/arcade-hub/LOCAL-EVENT.md).
  * Games not marked local keep their hosted URLs.
@@ -41,11 +42,18 @@ const host = flag("host") ?? "localhost";
 const lan = lanAddresses();
 const rocketPort = Number(flag("rocket-port") ?? 5173);
 const feudPort = Number(flag("feud-port") ?? 4100);
+const kartPort = flag("kart-port") ? Number(flag("kart-port")) : null;
 
 const games = DEFAULT_GAMES.map((game) => {
   if (game.id === "rocket-arena" && !has("no-rocket")) return { ...game, hostUrl: `http://${host}:${rocketPort}/` };
   if (game.id === "family-feud" && !has("no-feud")) {
     return { ...game, hostUrl: `http://${host}:${feudPort}/screen/local`, consoleUrl: `http://${host}:${feudPort}/host` };
+  }
+  if (game.id === "turbo-kart" && kartPort) {
+    // Manual games' join QR is drawn from joinUrl as-is, so it must be the LAN address (phones
+    // cannot reach "localhost"). A bare /controller link finds the kart lobby on its own.
+    const phoneHost = lan[0] ?? host;
+    return { ...game, hostUrl: `http://${host}:${kartPort}/`, joinUrl: `http://${phoneHost}:${kartPort}/controller` };
   }
   return game;
 });

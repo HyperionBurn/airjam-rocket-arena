@@ -1,7 +1,7 @@
 /** The phone app: join once, then vote, play and watch your standing. */
 import { useEffect, useMemo, useState } from "react";
 
-import { api, ApiError, forgetProfile, loadProfile, saveProfile, useCountdown, useRoom, type PublicState, type StoredProfile } from "./api";
+import { api, ApiError, forgetProfile, loadProfile, reachable, saveProfile, useCountdown, useRoom, type PublicState, type StoredProfile } from "./api";
 import { Avatar, Board, Display, GameArt, Header, Label, Ruler, Tag, Wordmark, gameOf, ordinal, points, style } from "./ui";
 
 /* ------------------------------------------------------------------- join */
@@ -141,7 +141,7 @@ const Playing = ({ state, me }: { state: PublicState; me: Me }) => {
   const [reload, setReload] = useState(0);
   const [menu, setMenu] = useState(false);
   const inRound = round.playerIds.includes(me.id);
-  const url = round.controllerUrl;
+  const url = round.controllerUrl ? reachable(round.controllerUrl, window.location.hostname) : null;
 
   if (!inRound) return <Notice title={game.name} body="This round started before you joined. You're in for the next one." />;
   if (!url) return <Notice label={`Round ${round.number}`} title={game.name} body={round.status === "launching" ? "Starting the game." : "Play on the big screen."} spinner />;

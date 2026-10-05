@@ -166,6 +166,25 @@ export const useCountdown = (endsAt: number | null | undefined, clockOffset: num
   return endsAt ? Math.max(0, (endsAt - (Date.now() + clockOffset)) / 1000) : 0;
 };
 
+const LOOPBACK = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+/**
+ * A game running on the laptop reports a controller URL on "localhost" (that is how the big
+ * screen reaches it, and localhost is the only plain-http address browsers treat as secure).
+ * A phone cannot reach the laptop's localhost, but it did reach the hub on the laptop's LAN
+ * address, so swap the host for the one this page was loaded from.
+ */
+export const reachable = (url: string, pageHost: string): string => {
+  try {
+    const parsed = new URL(url);
+    if (!LOOPBACK.has(parsed.hostname) || LOOPBACK.has(pageHost)) return url;
+    parsed.hostname = pageHost;
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+};
+
 /** Where phones should go to join, honouring a LAN address when the host is on localhost. */
 export const useJoinUrl = (code: string): string => {
   const [base, setBase] = useState(window.location.origin);

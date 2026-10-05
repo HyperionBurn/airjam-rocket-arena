@@ -10,6 +10,8 @@
     "dev:web": "vite",
     "build": "tsc --noEmit && vite build && tsup",
     "start": "node dist/server/main.js",
+    "games:local": "tsx scripts/local-games.ts",
+    "doctor": "tsx scripts/doctor.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

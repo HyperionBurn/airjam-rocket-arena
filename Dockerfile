@@ -42,6 +42,7 @@ COPY games/pong/package.json                    ./games/pong/
 COPY games/the-office/package.json              ./games/the-office/
 COPY games/last-band-standing/package.json      ./games/last-band-standing/
 COPY games/rocket-arena/package.json            ./games/rocket-arena/
+COPY apps/arcade-hub/package.json                ./apps/arcade-hub/
 
 # apps/platform has a file: dep on ./loader (turbopack-mdx-loader).
 # Even though this is the server image, `pnpm install --frozen-lockfile`
